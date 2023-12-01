@@ -1,4 +1,31 @@
 # Final-Project
-
+# Personalized Healthcare Recommendations System
 
 - [Codelabs](https://codelabs-preview.appspot.com/?file_id=1y61v1qp4Ka0kiWXvonMbmfMXaKszp-lO-T1XDsl-l0M#0)
+
+## Problem Statement:
+
+In the current healthcare landscape, patients often face challenges in navigating the vast array of medical information to make informed decisions about their treatment. There is a need for a comprehensive and user-friendly system that utilizes advanced technologies, including patient data embeddings and AI-driven recommendations, to deliver personalized medicine lists, doctor suggestions, and hospital recommendations. The goal is to empower individuals with tailored healthcare insights, enhancing the quality of their treatment decisions while navigating the complexities of the healthcare ecosystem
+
+
+## Project Description
+We are developing a sophisticated healthcare recommendation system with two pipelines. The first pipeline leverages Apache Airflow, Pinecone, and OpenAI to process diverse medical data sources, generating patient embeddings for personalized treatment insights.The second pipeline utilizes Streamlit to seamlessly feed patient data into OpenAI, generating personalized healthcare recommendations. This user-friendly system enhances treatment decision-making by integrating advanced technologies for a tailored healthcare experience
+
+## Technologies Used
+- Airflow
+- GCP
+- PostgreSQL Database
+- Streamlit
+- Open AI
+- Langchain
+- Pinecone Vector Database/Weaviate
+- Jupyter
+
+## Architecture Diagram
+
+
+
+
+
+
+
