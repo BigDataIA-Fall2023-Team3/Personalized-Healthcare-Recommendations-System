@@ -11,7 +11,7 @@ In the current healthcare landscape, patients often face challenges in navigatin
 ## Project Description
 We are developing a sophisticated healthcare recommendation system with two pipelines. The first pipeline leverages Apache Airflow, Pinecone, and OpenAI to process diverse medical data sources, generating patient embeddings for personalized treatment insights.The second pipeline utilizes Streamlit to seamlessly feed patient data into OpenAI, generating personalized healthcare recommendations. This user-friendly system enhances treatment decision-making by integrating advanced technologies for a tailored healthcare experience
 
-## Technologies Used
+## Technologies planned to use
 - Airflow
 - GCP
 - PostgreSQL Database
