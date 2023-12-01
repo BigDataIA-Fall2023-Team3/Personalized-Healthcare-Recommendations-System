@@ -23,7 +23,7 @@ We are developing a sophisticated healthcare recommendation system with two pipe
 
 ## Architecture Diagram
 
-<img width="760" alt="Screen Shot 2023-12-01 at 2 40 36 PM" src="https://github.com/BigDataIA-Fall2023-Team3/Final-Project/assets/71171604/ff9b18d8-2caf-4197-8d69-7e21fea74fab">
+<img width="705" alt="Screen Shot 2023-12-01 at 2 49 34 PM" src="https://github.com/BigDataIA-Fall2023-Team3/Final-Project/assets/71171604/d26dfc04-c9af-4758-96a0-7b74a7b37814">
 
 
 
