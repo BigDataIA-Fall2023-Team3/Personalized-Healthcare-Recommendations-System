@@ -16,6 +16,7 @@ We are developing a sophisticated healthcare recommendation system with two pipe
 - GCP
 - PostgreSQL Database
 - Streamlit
+- Pandas
 - Open AI
 - Langchain
 - Pinecone Vector Database/Weaviate
