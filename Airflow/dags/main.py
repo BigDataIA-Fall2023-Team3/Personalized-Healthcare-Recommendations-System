@@ -1,4 +1,5 @@
-
+import os
+import io
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from datetime import timedelta
@@ -8,16 +9,11 @@ from airflow.utils.dates import days_ago
 import requests
 import pandas as pd
 import re
+import csv
+import boto3
 
-
-# Specify the default arguments for the DAG
-# default_args = {
-#     'owner': 'airflow',
-#     'depends_on_past': False,
-#     'start_date': datetime(2023, 1, 1),
-#     'retries': 1,
-#     'retry_delay': timedelta(minutes=5),
-# }
+s3_bucket = 'final-project-data-sources'
+s3_object_key = 'List_of_Infectious_Diseases.csv'
 
 # Instantiate the DAG
 dag = DAG(
@@ -31,7 +27,7 @@ dag = DAG(
 )
 
 # Define a function that will be executed by the PythonOperator
-def scrape_and_download():
+def scrape_and_download(output_csv_file):
     # Site URL
     url = "https://en.wikipedia.org/wiki/List_of_infectious_diseases"
 
@@ -56,7 +52,7 @@ def scrape_and_download():
 
     body_rows = body[1:] # All other items becomes the rest of the rows
 
-# Lets now iterate through the head HTML code and make list of clean headings
+
 
 # Declare empty list to keep Columns names
     headings = []
@@ -90,18 +86,11 @@ def scrape_and_download():
 #print(df)
 
 
-# Reformat the data to fit the tables of the database schema
-# Modifying any column's character limit in the dataframe
-
 #reformatting 'Infectious agent' column by limitting the character length to 132 characters
         df['Infectious agent'] = df['Infectious agent'].str[:132]
 #reformatting 'Vaccine(s)' column to take in only 14 character long values
         df['Vaccine(s)'] = df['Vaccine(s)'].str[:14]
 
-
-
-
-#
 # #Cleaing all these columns' values to see if data is getting modified/replaced.
 # #UPDATE: commenting below logic since, clean was successful.
         df['Infectious agent'] = df['Infectious agent'].str.replace('á','a')
@@ -160,15 +149,32 @@ def scrape_and_download():
 
     # #Data cleaning is done for Diseases table
     # #Now exporting diseases dataframe in CSV
-        df3.to_csv('/opt/airflow/List_of_Infectious_Diseases.csv', index=False, encoding='utf-8')
+        # df3.to_csv('/opt/airflow/List_of_Infectious_Diseases.csv', index=False, encoding='utf-8')
 
-        print(df3)
-    # Save the scraped data to a CSV file
+    df3.to_csv(output_csv_file, index=True)
+    upload_csv_to_s3(output_csv_file, 'List_of_Infectious_Diseases.csv')
+
+#uploading to s3
+       
+def upload_csv_to_s3(csv_file_path, s3_object_key):
+    a_key = os.getenv('A_KEY')
+    sa_key = os.getenv('SA_KEY')
+
+    # Configure AWS credentials
+    os.environ['AWS_ACCESS_KEY_ID'] = a_key
+    os.environ['AWS_SECRET_ACCESS_KEY'] = sa_key
+
+    s3_client = boto3.client('s3')
+
+    # Upload the CSV file, replacing it if it already exists.
+    s3_client.upload_file(csv_file_path, 'final-project-data-sources', s3_object_key)
 
 # Create a PythonOperator that will run the scrape_and_download function
 scrape_task = PythonOperator(
     task_id='scrape_and_download',
     python_callable=scrape_and_download,
+    op_args=['/opt/airflow/List_of_Infectious_Diseases.csv'],  # Provide the output CSV file path as an argument
+    provide_context=True,  # This is needed to access the context in the function
     dag=dag,
 )
 
