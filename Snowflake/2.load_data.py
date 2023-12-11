@@ -1,18 +1,16 @@
 
 import snowflake.connector
-import os
+
 # Snowflake connection parameters
 snowflake_params = {
-    "account": os.environ['SNOWFLAKE_ACCOUNT'],
-    "user": os.environ['SNOWFLAKE_USER'],
-    "password": os.environ['SNOWFLAKE_PASSWORD'],
+    "account": "QBAHNTM-QOB86779",
+    "user": "sanjana",
+    "password": "Sanju1209",
     "warehouse": "FP_WH",
     "database": "FP_DB",
     "schema": "DATASETS_1",
     "role": "ANALYST_ROLE"
 }
-
-import snowflake.connector
 
 # Define the list of dataset names, corresponding stage names, and file URLs
 dataset_mapping = [
