@@ -1,11 +1,11 @@
 
 import snowflake.connector
-
+import os
 # Snowflake connection parameters
 snowflake_params = {
-    "account": "QBAHNTM-QOB86779",
-    "user": "sanjana",
-    "password": "Sanju1209",
+    "account": os.environ['SNOWFLAKE_ACCOUNT'],
+    "user": os.environ['SNOWFLAKE_USER'],
+    "password": os.environ['SNOWFLAKE_PASSWORD'],
     "warehouse": "FP_WH",
     "database": "FP_DB",
     "schema": "DATASETS_1",
