@@ -6,9 +6,8 @@ from io import BytesIO
 s3_bucket_name = 'final-project-datasets-1'
 s3_folder_name = 'Datasets-1-csv'
 
-# AWS access credentials (provide your own access key and secret key)
-aws_access_key_id = 'your_access_key_id'
-aws_secret_access_key = 'your_secret_access_key'
+# Initialize S3 client with anonymous credentials
+s3_client = boto3.client('s3', aws_access_key_id="None", aws_secret_access_key="None")
 
 # File paths
 xlsx_file_paths = [
@@ -20,13 +19,6 @@ xlsx_file_paths = [
     "s3://final-project-datasets-1/Datasets-1/Practice Specialities.xlsx"
 ]
 
-# Initialize S3 client with AWS credentials
-s3_client = boto3.client(
-    's3',
-    aws_access_key_id="AKIA53CCJVBCIBLKYVJI",
-    aws_secret_access_key="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"
-)
-
 # Loop through each XLSX file path, convert to CSV, and upload to S3
 for xlsx_file_path in xlsx_file_paths:
     try:
@@ -34,8 +26,8 @@ for xlsx_file_path in xlsx_file_paths:
         df = pd.read_excel(xlsx_file_path)
         
         # Convert DataFrame to CSV format
-        csv_data = df.to_csv(index=False)
-        
+        csv_data = df.to_csv(index=False, sep=';').encode('utf-8')
+
         # Define the S3 CSV file path
         csv_file_path = f"{s3_folder_name}/{xlsx_file_path.split('/')[-1].replace('.xlsx', '.csv')}"
         
@@ -50,3 +42,6 @@ for xlsx_file_path in xlsx_file_paths:
         print(f"Conversion and upload successful for {xlsx_file_path}")
     except Exception as e:
         print(f"Error processing {xlsx_file_path}: {str(e)}")
+
+
+

@@ -1,11 +1,12 @@
 
 import snowflake.connector
+import os
 
 # Snowflake connection parameters
 snowflake_params = {
-    "account": "QBAHNTM-QOB86779",
-    "user": "sanjana",
-    "password": "Sanju1209",
+    "account": os.environ.get('SNOWFLAKE_ACCOUNT'),
+    "user": os.environ.get('SNOWFLAKE_USER'),
+    "password": os.environ.get('SNOWFLAKE_PASSWORD'),
     "warehouse": "FP_WH",
     "database": "FP_DB",
     "schema": "DATASETS_1",
@@ -26,10 +27,27 @@ dataset_mapping = [
                  'ACCEPTS_NEW_PATIENTS VARCHAR(16777216)', 'PRACTICE_SPECIALITY VARCHAR(16777216)',
                  'HOSPITAL_AFFILIATIONS VARCHAR(16777216)', 'INSURANCE_PLANS VARCHAR(16777216)', 'CITY VARCHAR(16777216)',
                  'STATE VARCHAR(16777216)', 'ZIPCODE VARCHAR(16777216)']},
-    {'stage_name': 'PINCODE_STATE_CITY_STAGE', 'table_name': 'PINCODE_STATE_CITY', 'file_url': 's3://final-project-datasets-1/Datasets-1-csv/Pincodes_State_City.csv',
-     'columns': ['HOSPITAL_ID VARCHAR(16777216)', 'CITY VARCHAR(16777216)', 'STATE VARCHAR(16777216)', 'ZIPCODE VARCHAR(16777216)']},
+    {'stage_name': 'ZIPCODE_STAGE', 'table_name': 'ZIPCODE', 'file_url': 's3://final-project-datasets-1/Datasets-1-csv/Zipcode.csv',
+     'columns': [
+            'ZIPCODE VARCHAR(16777216)',
+            'CITY VARCHAR(16777216)',
+            'STATE VARCHAR(16777216)',
+            'COUNTY VARCHAR(16777216)',
+            'COUNTRY VARCHAR(16777216)',
+            'TIMEZONE VARCHAR(16777216)',
+            'LATITUDE VARCHAR(16777216)',
+            'LONGITUDE VARCHAR(16777216)'
+     ]},
     {'stage_name': 'PRACTICE_SPECIALITIES_STAGE', 'table_name': 'PRACTICE_SPECIALITIES', 'file_url': 's3://final-project-datasets-1/Datasets-1-csv/Practice Specialities.csv',
-     'columns': ['DOCTOR_ID VARCHAR(16777216)', 'PRACTICE_SPECIALITIES VARCHAR(16777216)']}
+     'columns': ['DOCTOR_ID VARCHAR(16777216)', 'PRACTICE_SPECIALITIES VARCHAR(16777216)']},
+    {'stage_name': 'DISEASES_STAGE', 'table_name': 'DISEASES', 'file_url': 's3://final-project-datasets-1/Datasets-1-csv/DISEASES.csv',
+     'columns' : ['DISEASE_ID VARCHAR(16777216)',
+          'DISEASE_NAME VARCHAR(16777216)',
+          'SIGNS_AND_SYMPTOMS VARCHAR(16777216)',
+          'DIAGNOSIS VARCHAR(16777216)',
+          'TREATMENT VARCHAR(16777216)',
+          'DISEASE_CATEGORY_ID VARCHAR(16777216)',
+          'DOCTOR_ID VARCHAR(16777216)']}
 ]
 
 
@@ -52,7 +70,10 @@ for mapping in dataset_mapping:
     conn.cursor().execute(create_table_sql)
 
     # Copy data from the stage into the table, handling errors
-    copy_data_sql = f"COPY INTO FP_DB.DATASETS_1.{table_name} FROM @FP_DB.DATASETS_1.{stage_name} FILE_FORMAT = (TYPE = 'CSV') ON_ERROR = 'CONTINUE'"
+    copy_data_sql = f"COPY INTO FP_DB.DATASETS_1.{table_name} FROM @FP_DB.DATASETS_1.{stage_name} " \
+                    "FILE_FORMAT = (TYPE = 'CSV' SKIP_HEADER = 1 " \
+                    "FIELD_OPTIONALLY_ENCLOSED_BY = '\042' FIELD_DELIMITER = ';' " \
+                    "ERROR_ON_COLUMN_COUNT_MISMATCH = FALSE)"
     conn.cursor().execute(copy_data_sql)
 
     # Grant necessary privileges to the ANALYST_ROLE on the table
