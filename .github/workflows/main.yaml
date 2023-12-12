@@ -1,0 +1,39 @@
+name: Snowflake Data Load and Processing
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  run_snowflake_data_load_and_processing:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+
+      - name: Install dependencies
+        run: pip install snowflake-connector-python
+
+      - name: Run Snowflake Data Load 1
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+        run: python Snowflake/2.load_data.py
+
+      - name: Run Snowflake Data Load 2
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+        run: python Snowflake/3.Normalization.py
+
+      # Add more steps here for additional Python files if needed
+
