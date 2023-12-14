@@ -1,6 +1,8 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import openai
+from openai import OpenAI
+client = OpenAI()
 import snowflake.connector
 import os
 
@@ -60,14 +62,17 @@ def generate_doctor_recommendations(symptoms, age, gender, special_instructions)
     prompt += f"Number the specialties too:\n"
     
     # Generate the answer with OpenAI API using the prompt
-    response = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt=prompt,
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": f"{prompt}"}
+        ],
         max_tokens=50,  # Adjust max_tokens to limit the response length
-        n=1  # Request up to 3 doctor recommendations
+        n=1  
     )
     # print(response)
-    recommendations = response.choices
+    recommendations = [response.choices[0].message.content.split("\n")[2], response.choices[0].message.content.split("\n")[3], response.choices[0].message.content.split("\n")[4]]
     
     return recommendations
 
@@ -75,13 +80,18 @@ def initial(symptoms, age, gender, special_instructions):
     prompt = f"Patient (Age: {age}, Gender: {gender}) presents with the following symptoms: {symptoms}\n"
     prompt += f"Special Instructions: {special_instructions}\n"
     prompt += "Give an initial diagnosis based on the patient's symptoms and nothing else:\n"
-    response = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt=prompt,
-        max_tokens=50,  
+    
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": f"{prompt}"}
+        ],
+        max_tokens=50,  # Adjust max_tokens to limit the response length
         n=3  
     )
-    recommendations = [response.choices[0].text, response.choices[1].text, response.choices[2].text]
+    recommendations = [response.choices[0].message.content, response.choices[1].message.content, response.choices[2].message.content]
+    # ''' response.choices[1]['message']['content'], response.choices[2]['message']['content']]'''
     return recommendations
 
 
@@ -94,13 +104,14 @@ async def find_doctors(symptom_model: SymptomModel):
             symptom_model.gender,
             symptom_model.special_instructions
         )
+        # top_recommendations = recommendations[0].text.split("\n")[0].split(", ")
         return recommendations
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Error while communicating with OpenAI")
+    except:
+        raise HTTPException(status_code=400, detail="Error Connecting to OpenAI API")
 
 @app.post("/initial-diagnosis/")
 async def initial_diagnosis(symptom_model: SymptomModel):
-    try:
+    try: 
         recommendations = initial(
             symptom_model.symptoms,
             symptom_model.age,
@@ -108,8 +119,9 @@ async def initial_diagnosis(symptom_model: SymptomModel):
             symptom_model.special_instructions
         )
         return recommendations
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Error while communicating with OpenAI")
+    except:
+        raise HTTPException(status_code=400, detail="Error Connecting to OpenAI API")
+
     
 @app.post("/get_doctors/")
 async def get_doctors(specialty, insurance):
@@ -119,5 +131,5 @@ async def get_doctors(specialty, insurance):
             insurance
         )
         return recommendations
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Error while communicating with OpenAI")
+    except:
+        raise HTTPException(status_code=400, detail="Error Connecting to Snowflake")
