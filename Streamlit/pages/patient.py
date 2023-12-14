@@ -73,34 +73,7 @@ def get_doctors(insurance, specialty):
     }
     response = requests.post(url, json=data)
     return response.json()
-
-def display_doctors_table(doctors_data):
-
-    column_names = [
-        "DOCTORS NAME",
-        "LICENSE ID",
-        "LICENSE STATUS",
-        "ACCEPTS MEDICAID",
-        "ACCEPTS NEW PATIENTS",
-        "INSURANCE",
-        "CITY",
-        "STATE",
-        "ZIPCODE",
-        "LATITUDE",
-        "LONGITUDE",
-        "TIMEZONE",
-        "DOCTORS ID",
-        "PRACTICE NAME",
-    ]
-
-    # Create a table with the specified column names
-    filtered_data = [row[1:] for row in doctors_data]
-    st.table(pd.DataFrame(filtered_data, columns=column_names))
-
-    
-            
-            
-
+  
 
 def check_session_timeout(session_start_time, timeout_minutes=30):
     current_time = time.time()
@@ -182,24 +155,74 @@ if st.session_state['logged_in']:
         
         elif st.session_state['display_content'] == 'doctors':
             r = find_doctors(Symptoms, age, gender, AI)
-            st.subheader("Doctors: According to the symptoms you have entered:")
-            with st.expander(r[0]):
-                re = r[0].split(" ")
-                remo = ' '.join(re[1:])
-                st.write(remo)
-                results = get_doctors(insurance, remo)
-                display_doctors_table(results)
+            st.title("Personalized Doctors: ", )
+            st.subheader(r[0])
+            re = r[0].split(" ")
+            remo = ' '.join(re[1:])
+            results = get_doctors(insurance, remo)
+            for row in results:
+                expander_title = f"{row[1]}"
+                with st.expander(expander_title, expanded=False):
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.write(f"Doctor Name: {row[1]}")
+                        st.write(f"Practice: {row[14]}")
+                        st.write(f"License ID: {row[2]}")
+                        st.write(f"License Status: {row[3]}")
+                    with col2:
+                        st.write(f"Accepts Medicaid: {row[4]}")
+                        st.write(f"Accepts New Patients: {row[5]}")
+                        st.write(f"Insurance: {row[6]}")
+                        st.write(f"City: {row[7]}")
+                        st.write(f"State: {row[8]}")
+                        st.write(f"Zipcode: {row[9]}")
+                    st.markdown("[Book Appointment here](https://www.zocdoc.com/)")
 
-            with st.expander(r[1]):
-                remo = ' '.join(re[1:])
-                st.write(remo)
-                results = get_doctors(insurance, remo)
-                display_doctors_table(results)
-            with st.expander(r[2]):
-                remo = ' '.join(re[1:])
-                st.write(remo)  
-                results = get_doctors(insurance, remo) 
-                display_doctors_table(results)
+            st.subheader(r[1])
+            re = r[1].split(" ")
+            remo = ' '.join(re[1:])
+            st.write(remo)
+            results = get_doctors(insurance, remo)
+            for row in results:
+                expander_title = f"{row[1]}"
+                with st.expander(expander_title, expanded=False):
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.write(f"Doctor Name: {row[1]}")
+                        st.write(f"Practice: {row[14]}")
+                        st.write(f"License ID: {row[2]}")
+                        st.write(f"License Status: {row[3]}")
+                    with col2:
+                        st.write(f"Accepts Medicaid: {row[4]}")
+                        st.write(f"Accepts New Patients: {row[5]}")
+                        st.write(f"Insurance: {row[6]}")
+                        st.write(f"City: {row[7]}")
+                        st.write(f"State: {row[8]}")
+                        st.write(f"Zipcode: {row[9]}")
+                    st.markdown("[Book Appointment here](https://www.zocdoc.com/)")
+
+            st.subheader(r[2])
+            re = r[2].split(" ")
+            remo = ' '.join(re[1:])
+            st.write(remo)
+            results = get_doctors(insurance, remo)
+            for row in results:
+                expander_title = f"{row[1]}"
+                with st.expander(expander_title, expanded=False):
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.write(f"Doctor Name: {row[1]}")
+                        st.write(f"Practice: {row[14]}")
+                        st.write(f"License ID: {row[2]}")
+                        st.write(f"License Status: {row[3]}")
+                    with col2:
+                        st.write(f"Accepts Medicaid: {row[4]}")
+                        st.write(f"Accepts New Patients: {row[5]}")
+                        st.write(f"Insurance: {row[6]}")
+                        st.write(f"City: {row[7]}")
+                        st.write(f"State: {row[8]}")
+                        st.write(f"Zipcode: {row[9]}")
+                    st.markdown("[Book Appointment here](https://www.zocdoc.com/)")
         
         elif st.session_state['display_content'] == 'hospitals':
             st.write("Hospital information goes here.")
@@ -212,7 +235,6 @@ if st.session_state['logged_in']:
 
 # Close the database connection
 conn.close()
-
 
 
 
