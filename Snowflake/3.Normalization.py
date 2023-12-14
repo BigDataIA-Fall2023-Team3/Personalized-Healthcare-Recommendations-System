@@ -109,6 +109,23 @@ conn.cursor().execute(sql_query)
 print("HOSPITALS table created")
 
 ############################################################################################################
+# Cleaning and Formatting the ZIPCODE data
+
+sql_query = """
+-- Create or replace the "ZIPCODE" table in "DATASETS_2"
+CREATE OR REPLACE TABLE FP_DB.DATASETS_2.ZIPCODE AS
+SELECT 
+LEFT(ZIPCODE, 5) AS ZIPCODE,
+CITY,
+STATE,
+COUNTY,
+LATITUDE,
+LONGITUDE,
+TIMEZONE
+FROM FP_DB.DATASETS_1.ZIPCODE;
+"""
+conn.cursor().execute(sql_query)
+print("ZIPCODE table created")
 
 
 conn.close()
