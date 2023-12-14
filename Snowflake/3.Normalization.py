@@ -115,7 +115,7 @@ sql_query = """
 -- Create or replace the "ZIPCODE" table in "DATASETS_2"
 CREATE OR REPLACE TABLE FP_DB.DATASETS_2.ZIPCODE AS
 SELECT 
-LEFT(ZIPCODE, 5) AS ZIPCODE,
+LPAD(CAST(ZIPCODE AS VARCHAR), 5, '0') AS ZIPCODE,
 CITY,
 STATE,
 COUNTY,
@@ -126,6 +126,7 @@ FROM FP_DB.DATASETS_1.ZIPCODE;
 """
 conn.cursor().execute(sql_query)
 print("ZIPCODE table created")
+
 
 
 conn.close()
