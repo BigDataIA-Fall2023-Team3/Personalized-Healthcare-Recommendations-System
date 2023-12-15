@@ -65,11 +65,12 @@ def initial_diagnosis(symptoms, age, gender, special_instructions):
     response = requests.post(url, json=data)
     return response.json()
 
-def get_doctors(insurance, specialty):
+def get_doctors(insurance, specialty, Zipcode):
     url = 'https://project-final-f9937888519e.herokuapp.com/get_doctors/'
     data = {
         "insurance": insurance,
-        "specialty": specialty
+        "specialty": specialty,
+        "Zipcode": Zipcode
     }
     response = requests.post(url, json=data)
     return response.json()
@@ -155,74 +156,93 @@ if st.session_state['logged_in']:
         
         elif st.session_state['display_content'] == 'doctors':
             r = find_doctors(Symptoms, age, gender, AI)
+            # st.write(r)
             st.title("Personalized Doctors: ", )
-            st.subheader(r[0])
-            re = r[0].split(" ")
-            remo = ' '.join(re[1:])
-            results = get_doctors(insurance, remo)
-            for row in results:
-                expander_title = f"{row[1]}"
-                with st.expander(expander_title, expanded=False):
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        st.write(f"Doctor Name: {row[1]}")
-                        st.write(f"Practice: {row[14]}")
-                        st.write(f"License ID: {row[2]}")
-                        st.write(f"License Status: {row[3]}")
-                    with col2:
-                        st.write(f"Accepts Medicaid: {row[4]}")
-                        st.write(f"Accepts New Patients: {row[5]}")
-                        st.write(f"Insurance: {row[6]}")
-                        st.write(f"City: {row[7]}")
-                        st.write(f"State: {row[8]}")
-                        st.write(f"Zipcode: {row[9]}")
-                    st.markdown("[Book Appointment here](https://www.zocdoc.com/)")
-
-            st.subheader(r[1])
-            re = r[1].split(" ")
-            remo = ' '.join(re[1:])
-            st.write(remo)
-            results = get_doctors(insurance, remo)
-            for row in results:
-                expander_title = f"{row[1]}"
-                with st.expander(expander_title, expanded=False):
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        st.write(f"Doctor Name: {row[1]}")
-                        st.write(f"Practice: {row[14]}")
-                        st.write(f"License ID: {row[2]}")
-                        st.write(f"License Status: {row[3]}")
-                    with col2:
-                        st.write(f"Accepts Medicaid: {row[4]}")
-                        st.write(f"Accepts New Patients: {row[5]}")
-                        st.write(f"Insurance: {row[6]}")
-                        st.write(f"City: {row[7]}")
-                        st.write(f"State: {row[8]}")
-                        st.write(f"Zipcode: {row[9]}")
-                    st.markdown("[Book Appointment here](https://www.zocdoc.com/)")
-
-            st.subheader(r[2])
-            re = r[2].split(" ")
-            remo = ' '.join(re[1:])
-            st.write(remo)
-            results = get_doctors(insurance, remo)
-            for row in results:
-                expander_title = f"{row[1]}"
-                with st.expander(expander_title, expanded=False):
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        st.write(f"Doctor Name: {row[1]}")
-                        st.write(f"Practice: {row[14]}")
-                        st.write(f"License ID: {row[2]}")
-                        st.write(f"License Status: {row[3]}")
-                    with col2:
-                        st.write(f"Accepts Medicaid: {row[4]}")
-                        st.write(f"Accepts New Patients: {row[5]}")
-                        st.write(f"Insurance: {row[6]}")
-                        st.write(f"City: {row[7]}")
-                        st.write(f"State: {row[8]}")
-                        st.write(f"Zipcode: {row[9]}")
-                    st.markdown("[Book Appointment here](https://www.zocdoc.com/)")
+            if r[0] is not None:
+                # st.subheader(r[0])
+                st.subheader(r[0])
+                re = r[0].split(" ")
+                remo = ' '.join(re[1:])
+                # st.write(remo)
+                results = get_doctors(insurance, remo, Zipcode)
+                # st.write(results)
+                for row in results:
+                    expander_title = f"{row[1]}"
+                    with st.expander(expander_title, expanded=False):
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.write(f"Doctor Name: {row[1]}")
+                            st.write(f"Practice: {row[14]}")
+                            st.write(f"License ID: {row[2]}")
+                            st.write(f"License Status: {row[3]}")
+                        with col2:
+                            st.write(f"Accepts Medicaid: {row[4]}")
+                            st.write(f"Accepts New Patients: {row[5]}")
+                            st.write(f"Insurance: {row[6]}")
+                            st.write(f"City: {row[7]}")
+                            st.write(f"State: {row[8]}")
+                            st.write(f"Zipcode: {row[9]}")
+                        st.markdown("[Book Appointment here](https://www.zocdoc.com/)")
+            else:
+                st.subheader("No doctors found for these Symptoms in the current database.")
+                st.write("Please try again later. We keep Updating the database every week. Thank you for your patience.")
+                st.write("You can also try searching for doctors [here](https://www.zocdoc.com/).")
+            if r[1] is not None:
+                st.subheader(r[1])
+                re = r[1].split(" ")
+                remo = ' '.join(re[1:])
+                # st.write(remo)
+                results = get_doctors(insurance, remo, Zipcode)
+                # st.write(results)
+                for row in results:
+                    expander_title = f"{row[1]}"
+                    with st.expander(expander_title, expanded=False):
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.write(f"Doctor Name: {row[1]}")
+                            st.write(f"Practice: {row[14]}")
+                            st.write(f"License ID: {row[2]}")
+                            st.write(f"License Status: {row[3]}")
+                        with col2:
+                            st.write(f"Accepts Medicaid: {row[4]}")
+                            st.write(f"Accepts New Patients: {row[5]}")
+                            st.write(f"Insurance: {row[6]}")
+                            st.write(f"City: {row[7]}")
+                            st.write(f"State: {row[8]}")
+                            st.write(f"Zipcode: {row[9]}")
+                        st.markdown("[Book Appointment here](https://www.zocdoc.com/)")
+            else:
+                st.subheader("No doctors found for these Symptoms in the current database.")
+                st.write("Please try again later. We keep Updating the database every week. Thank you for your patience.")
+                st.write("You can also try searching for doctors [here](https://www.zocdoc.com/).")
+            if r[2] is not None:
+                st.subheader(r[2])
+                re = r[2].split(" ")
+                remo = ' '.join(re[1:])
+                # st.write(remo)
+                results = get_doctors(insurance, remo, Zipcode)
+                # st.write(results)
+                for row in results:
+                    expander_title = f"{row[1]}"
+                    with st.expander(expander_title, expanded=False):
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.write(f"Doctor Name: {row[1]}")
+                            st.write(f"Practice: {row[14]}")
+                            st.write(f"License ID: {row[2]}")
+                            st.write(f"License Status: {row[3]}")
+                        with col2:
+                            st.write(f"Accepts Medicaid: {row[4]}")
+                            st.write(f"Accepts New Patients: {row[5]}")
+                            st.write(f"Insurance: {row[6]}")
+                            st.write(f"City: {row[7]}")
+                            st.write(f"State: {row[8]}")
+                            st.write(f"Zipcode: {row[9]}")
+                        st.markdown("[Book Appointment here](https://www.zocdoc.com/)")
+            else:
+                st.subheader("No doctors found for these Symptoms in the current database.")
+                st.write("Please try again later. We keep Updating the database every week. Thank you for your patience.")
+                st.write("You can also try searching for doctors [here](https://www.zocdoc.com/).")
         
         elif st.session_state['display_content'] == 'hospitals':
             st.write("Hospital information goes here.")

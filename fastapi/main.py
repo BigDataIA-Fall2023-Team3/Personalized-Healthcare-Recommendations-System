@@ -5,6 +5,8 @@ from openai import OpenAI
 client = OpenAI()
 import snowflake.connector
 import os
+import pandas as pd
+import math
 
 app = FastAPI()
 
@@ -19,6 +21,11 @@ class SymptomModel(BaseModel):
 class OpenAIModel(BaseModel):
     api_key: str
 
+class Insurance(BaseModel):
+    insurance: str
+    specialty: str
+    Zipcode: str
+
 # Set your OpenAI API key
 openai.api_key = os.environ['OPENAI_API_KEY']  # Replace with your actual API key
 snowflake_config = {
@@ -30,6 +37,56 @@ snowflake_config = {
     "warehouse": "FP_WH",
 }
 
+
+def haversine(lat1, lon1, lat2, lon2):
+    R = 6371.0
+    lat1 = math.radians(lat1)
+    lon1 = math.radians(lon1)
+    lat2 = math.radians(lat2)
+    lon2 = math.radians(lon2)
+    
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+    a = math.sin(dlat / 2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    distance = R * c   
+    return distance
+
+def find_close(l, myzip, insurance, specialty):
+    d = {}
+    conn = snowflake.connector.connect(**snowflake_config)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM FP_DB.DATASETS_2.ZIPCODE")
+    df = pd.DataFrame(cursor.fetchall())
+    df.columns = ['ZipCode', 'City', 'State', 'County', 'Latitude', 'Longitude', 'TimeZone' ]
+    
+    result = df[df['ZipCode'] == myzip]
+    if result.empty:
+        return "Zip code not found."
+    
+    lat1 = float(result['Latitude'].iloc[0])
+    long1 = float(result['Longitude'].iloc[0])
+    
+    for i in l:
+        result = df[df['ZipCode'] == i]
+        if not result.empty:
+            latitude = float(result['Latitude'].iloc[0])
+            longitude = float(result['Longitude'].iloc[0])
+            dis = haversine(lat1, long1, latitude, longitude)
+            d[i] = dis
+    
+    # Sort the dictionary by distance
+    sorted_d = dict(sorted(d.items(), key=lambda item: item[1]))
+    results = []
+    for i in sorted_d.keys():
+        cursor.execute("SELECT * FROM FP_DB.DATASETS_2.DOCTORS LEFT JOIN FP_DB.DATASETS_2.PRACTICE_SPECIALITIES ON DOCTORS.DOCTORS_ID = PRACTICE_SPECIALITIES.DOCTOR_ID WHERE SPECIALITY LIKE %s AND ZIPCODE = %s AND INSURANCE = %s;", (f'%{specialty}%', i, insurance))
+        specialties = cursor.fetchall()
+        if specialties:
+            for i in specialties:
+                results.append(i)
+    return results[:3]
+
+
 def get_doctor_specialties():
     conn = snowflake.connector.connect(**snowflake_config)
     cursor = conn.cursor()
@@ -40,15 +97,17 @@ def get_doctor_specialties():
     conn.close()
     return specialties
 
-def get_doctor(specialty, insurance):
+def get_doctor(specialty, insurance, Zipcode):
     conn = snowflake.connector.connect(**snowflake_config)
     cursor = conn.cursor()
     # Use placeholders for specialty and insurance variables
     cursor.execute("SELECT * FROM FP_DB.DATASETS_2.DOCTORS LEFT JOIN FP_DB.DATASETS_2.PRACTICE_SPECIALITIES ON DOCTORS.DOCTORS_ID = PRACTICE_SPECIALITIES.DOCTOR_ID WHERE speciality LIKE %s AND INSURANCE = %s;", (f'%{specialty}%', insurance))
     specialties = cursor.fetchall()
+    zipcodes = [row[9] for row in specialties]
+    find_closest = find_close(zipcodes, Zipcode, insurance, specialty)
     cursor.close()
     conn.close()
-    return specialties
+    return find_closest
 
 
 
@@ -124,11 +183,12 @@ async def initial_diagnosis(symptom_model: SymptomModel):
 
     
 @app.post("/get_doctors/")
-async def get_doctors(specialty, insurance):
+async def get_doctors(insurance: Insurance):
     try:
         recommendations = get_doctor(
-            specialty,
-            insurance
+            insurance.specialty,
+            insurance.insurance,
+            insurance.Zipcode
         )
         return recommendations
     except:
