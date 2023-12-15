@@ -2,6 +2,7 @@ import streamlit as st
 import base64
 import psycopg2
 import pandas as pd
+import bcrypt
 
 def connect_db():
     return psycopg2.connect(
@@ -31,14 +32,20 @@ csv_file_path = st.secrets["INSURANCE_PATH"]
 df = pd.read_csv(csv_file_path)
 options = df.iloc[:, 0].unique().tolist()
 
+def hash_password(password):
+    pw =  bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+    return pw.decode('utf-8')
+
+
 def add_patient(username, password, first_name, last_name, age, has_insurance, insurance, gender):
     try:
         conn = connect_db()
         cursor = conn.cursor()
         
         # Modify the query based on your table structure
+        hashed_password = hash_password(password)
         cursor.execute("INSERT INTO patient (first_name, last_name, age, has_insurance, insurance, gender, username, password) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)", 
-                       (first_name, last_name, age, has_insurance, insurance, gender, username, password))
+                       (first_name, last_name, age, has_insurance, insurance, gender, username, hashed_password))
         
         conn.commit()
     except Exception as e:
@@ -51,8 +58,9 @@ def add_doctor(first_name, last_name, practice, email, username, password):
     conn = connect_db()
     cursor = conn.cursor()
     # Modify the query based on your table structure
+    hashed_password = hash_password(password)
     cursor.execute("INSERT INTO doctor (first_name, last_name, practice, email, username, password) VALUES (%s, %s, %s, %s, %s, %s)", 
-                   (first_name, last_name, practice, email, username, password))
+                   (first_name, last_name, practice, email, username, hashed_password))
     conn.commit()
     conn.close()
 

@@ -5,6 +5,7 @@ import time
 import requests
 import json
 import pandas as pd
+import bcrypt
 
 # Parameters for connecting to the database
 db_host = st.secrets["DB_HOST"]
@@ -39,6 +40,11 @@ def set_bg_hack(main_bg):
         unsafe_allow_html=True
     )
 set_bg_hack(st.secrets["IMAGE_PATH"])
+
+def check_password(hashed_password, user_password):
+    return bcrypt.checkpw(user_password.encode('utf-8'), hashed_password)
+
+
 ##############################################################################################################
 #FASTAPI Functions
 # Function to get Doctor Specialies:
@@ -136,15 +142,21 @@ if not st.session_state['logged_in']:
     login_button = st.sidebar.button("Login")
 
     if login_button:
-        cursor.execute("SELECT * FROM patient WHERE username = %s AND password = %s", (username, password))
+        cursor.execute("SELECT * FROM patient WHERE username = %s", (username,))
         result = cursor.fetchone()
         if result:
-            st.session_state['logged_in'] = True
-            st.session_state['username'] = username
-            st.session_state['session_start_time'] = time.time()
-            st.session_state['patient_details'] = result  # Store patient details
+            hashed_password = result[-1]
+            if isinstance(hashed_password, str):
+                hashed_password = hashed_password.encode('utf-8')
+            if hashed_password and check_password(hashed_password, password):
+                st.session_state['logged_in'] = True
+                st.session_state['username'] = username
+                st.session_state['session_start_time'] = time.time()
+                st.session_state['patient_details'] = result 
+            else:
+                 st.warning("Incorrect Password")
         else:
-            st.warning("Incorrect Username/Password")
+            st.warning("Incorrect Username not found")
 
 ##############################################################################################################
 # Session management and main app content

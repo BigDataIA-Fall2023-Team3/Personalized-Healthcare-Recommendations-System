@@ -35,6 +35,10 @@ def set_bg_hack(main_bg):
     )
 set_bg_hack(st.secrets["IMAGE_PATH"])
 
+def check_password(hashed_password, user_password):
+    return bcrypt.checkpw(user_password.encode('utf-8'), hashed_password)
+
+
 # Function to check if session has timed out
 def check_session_timeout(session_start_time, timeout_minutes=30):
     current_time = time.time()
@@ -65,7 +69,7 @@ if not st.session_state['logged_in']:
     if login_button:
         cursor.execute("SELECT * FROM doctor WHERE username = %s AND password = %s", (username, password))
         result = cursor.fetchone()
-        if result:
+        if result and check_password(result[0].encode('utf-8'), password):
             st.session_state['logged_in'] = True
             st.session_state['username'] = username
             st.session_state['session_start_time'] = time.time()
