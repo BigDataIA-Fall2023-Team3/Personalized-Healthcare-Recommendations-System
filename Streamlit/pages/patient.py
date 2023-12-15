@@ -294,10 +294,8 @@ if st.session_state['logged_in']:
                 df = pd.DataFrame(results)
                 df.columns = ['Hospital ID', 'Hospital Name', 'Zipcode', 'City', 'Latitude', 'Longitude', 'TimeZone']
                 df['Location'] = df.apply(lambda row: f'<a href="https://www.google.com/maps/search/?api=1&query={row.iloc[4]},{row.iloc[5]}" target="_blank">Maps</a>', axis=1)
-                st.markdown(df.to_html(escape=False, index=False), unsafe_allow_html=True)
                 df = df.drop(['Latitude', 'Longitude', 'TimeZone'], axis=1)
-                if df is not None:
-                    st.table(df)
+                st.markdown(df.to_html(escape=False, index=False), unsafe_allow_html=True)
             
 
         # Logout button
