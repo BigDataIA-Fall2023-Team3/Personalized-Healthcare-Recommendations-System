@@ -55,12 +55,11 @@ def check_session_timeout(session_start_time, timeout_minutes=30):
     current_time = time.time()
     elapsed_time = current_time - session_start_time
     return elapsed_time > (timeout_minutes * 60)
-
+from openai import OpenAI
+client = OpenAI()
 def perform_pinecone_search(txt):
-    # Use the OpenAI Embed API to get the text embedding
-    embedding = openai.Embedding.create(model="text-embedding-ada-002", input=txt)["data"][0]["embedding"]
+    embedding = client.embeddings.create(model="text-embedding-ada-002", input=txt).data[0].embedding
     
-    # Perform Pinecone search using the embedding
     res = index.query(vector=embedding, top_k=1, include_metadata=True)
 
     return res
