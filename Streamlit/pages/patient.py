@@ -146,6 +146,7 @@ if not st.session_state['logged_in']:
         else:
             st.warning("Incorrect Username/Password")
 
+##############################################################################################################
 # Session management and main app content
 if st.session_state['logged_in']:
     # Check for session timeout
@@ -153,10 +154,6 @@ if st.session_state['logged_in']:
         st.session_state['logged_in'] = False
         st.warning("Session has timed out. Please login again.")
     else:
-        # Display user interface
-        pass
-            
-
         # Show patient details
         patient_details = st.session_state['patient_details']
         patient_id, first_name, last_name, age, has_insurance, insurance, gender, username, password = patient_details
@@ -183,120 +180,133 @@ if st.session_state['logged_in']:
         with col3:
             st.button("Hospitals", on_click=lambda: st.session_state.update({'display_content': 'hospitals'}))
 
-        # Display content based on button click
+##############################################################################################################
+        # INITIAL DIAGNOSIS
         if st.session_state['display_content'] == 'initial_diagnosis':
-            r = initial_diagnosis(Symptoms, age, gender, AI)
-            st.subheader("Initial Diagnosis: According to the symptoms you have entered:")
-            st.write("ranked with highest probability:")
-            with st.expander("First Hypothesis"):
-                st.write(r[0])
-            with st.expander("Second Hypothesis"):
-                st.write(r[1])
-            with st.expander("Third Hypothesis"):
-                st.write(r[2])
+            if Symptoms != "":
+                r = initial_diagnosis(Symptoms, age, gender, AI)
+                st.subheader("Initial Diagnosis: According to the symptoms you have entered:")
+                st.write("ranked with highest probability:")
+                with st.expander("First Hypothesis"):
+                    st.write(r[0])
+                with st.expander("Second Hypothesis"):
+                    st.write(r[1])
+                with st.expander("Third Hypothesis"):
+                    st.write(r[2])
+            else:
+                st.warning("Please enter Symptoms to get initial diagnosis.")
         
-        
+ ##############################################################################################################
+        # DOCTORS       
         elif st.session_state['display_content'] == 'doctors':
-            r = find_doctors(Symptoms, age, gender, AI)
-            # st.write(r)
-            st.title("Personalized Doctors: ", )
+            if Symptoms != "":
+                r = find_doctors(Symptoms, age, gender, AI)
+                # st.write(r)
+                st.title("Personalized Doctors: ", )
 
-            st.subheader(r[0])
-            re = r[0].split(" ")
-            remo = ' '.join(re[1:])
-            results = get_doctors(insurance, remo, Zipcode)
-            if len(results)> 0: 
-                for row in results:
-                    expander_title = f"{row[1]}"
-                    with st.expander(expander_title, expanded=False):
-                        col1, col2 = st.columns(2)
-                        with col1:
-                            st.write(f"Doctor Name: {row[1]}")
-                            st.write(f"Practice: {row[14]}")
-                            st.write(f"License ID: {row[2]}")
-                            st.write(f"License Status: {row[3]}")
-                        with col2:
-                            st.write(f"Accepts Medicaid: {row[4]}")
-                            st.write(f"Accepts New Patients: {row[5]}")
-                            st.write(f"Insurance: {row[6]}")
-                            st.write(f"City: {row[7]}")
-                            st.write(f"State: {row[8]}")
-                            st.write(f"Zipcode: {row[9]}")
-                        st.markdown(f'[Find the Doctor here](https://www.google.com/maps/search/?api=1&query={row[10]},{row[11]})', unsafe_allow_html=True)
-                        st.markdown("[Book Appointment here](https://www.zocdoc.com/)")
+                st.subheader(r[0])
+                re = r[0].split(" ")
+                remo = ' '.join(re[1:])
+                results = get_doctors(insurance, remo, Zipcode)
+                if len(results)> 0: 
+                    for row in results:
+                        expander_title = f"{row[1]}"
+                        with st.expander(expander_title, expanded=False):
+                            col1, col2 = st.columns(2)
+                            with col1:
+                                st.write(f"Doctor Name: {row[1]}")
+                                st.write(f"Practice: {row[14]}")
+                                st.write(f"License ID: {row[2]}")
+                                st.write(f"License Status: {row[3]}")
+                            with col2:
+                                st.write(f"Accepts Medicaid: {row[4]}")
+                                st.write(f"Accepts New Patients: {row[5]}")
+                                st.write(f"Insurance: {row[6]}")
+                                st.write(f"City: {row[7]}")
+                                st.write(f"State: {row[8]}")
+                                st.write(f"Zipcode: {row[9]}")
+                            st.markdown(f'[Find the Doctor here](https://www.google.com/maps/search/?api=1&query={row[10]},{row[11]})', unsafe_allow_html=True)
+                            st.markdown("[Book Appointment here](https://www.zocdoc.com/)")
+                else:
+                    st.subheader("No doctors found for these Symptoms in the current database.")
+                    st.write("Please try again later. We keep Updating the database every week. Thank you for your patience.")
+                    st.write("You can also try searching for doctors [here](https://www.zocdoc.com/).")
+                st.subheader(r[1])
+                re = r[1].split(" ")
+                remo = ' '.join(re[1:])
+                results = get_doctors(insurance, remo, Zipcode)
+                if len(results)> 0:
+                    for row in results:
+                        expander_title = f"{row[1]}"
+                        with st.expander(expander_title, expanded=False):
+                            col1, col2 = st.columns(2)
+                            with col1:
+                                st.write(f"Doctor Name: {row[1]}")
+                                st.write(f"Practice: {row[14]}")
+                                st.write(f"License ID: {row[2]}")
+                                st.write(f"License Status: {row[3]}")
+                            with col2:
+                                st.write(f"Accepts Medicaid: {row[4]}")
+                                st.write(f"Accepts New Patients: {row[5]}")
+                                st.write(f"Insurance: {row[6]}")
+                                st.write(f"City: {row[7]}")
+                                st.write(f"State: {row[8]}")
+                                st.write(f"Zipcode: {row[9]}")
+                            st.markdown(f'[Find the Doctor here](https://www.google.com/maps/search/?api=1&query={row[10]},{row[11]})', unsafe_allow_html=True)
+                            st.markdown("[Book Appointment here](https://www.zocdoc.com/)")
+                else:
+                    st.subheader("No doctors found for these Symptoms in the current database.")
+                    st.write("Please try again later. We keep Updating the database every week. Thank you for your patience.")
+                    st.write("You can also try searching for doctors [here](https://www.zocdoc.com/).")
+                st.subheader(r[2])
+                re = r[2].split(" ")
+                remo = ' '.join(re[1:])
+                results = get_doctors(insurance, remo, Zipcode)
+                if len(results)> 0:
+                    for row in results:
+                        expander_title = f"{row[1]}"
+                        with st.expander(expander_title, expanded=False):
+                            col1, col2 = st.columns(2)
+                            with col1:
+                                st.write(f"Doctor Name: {row[1]}")
+                                st.write(f"Practice: {row[14]}")
+                                st.write(f"License ID: {row[2]}")
+                                st.write(f"License Status: {row[3]}")
+                            with col2:
+                                st.write(f"Accepts Medicaid: {row[4]}")
+                                st.write(f"Accepts New Patients: {row[5]}")
+                                st.write(f"Insurance: {row[6]}")
+                                st.write(f"City: {row[7]}")
+                                st.write(f"State: {row[8]}")
+                                st.write(f"Zipcode: {row[9]}")
+                            st.markdown(f'[Find the Doctor here](https://www.google.com/maps/search/?api=1&query={row[10]},{row[11]})', unsafe_allow_html=True)
+                            st.markdown("[Book Appointment here](https://www.zocdoc.com/)")
+                else:
+                    st.subheader("No doctors found for these Symptoms in the current database.")
+                    st.write("Please try again later. We keep Updating the database every week. Thank you for your patience.")
+                    st.write("You can also try searching for doctors [here](https://www.zocdoc.com/).")
             else:
-                st.subheader("No doctors found for these Symptoms in the current database.")
-                st.write("Please try again later. We keep Updating the database every week. Thank you for your patience.")
-                st.write("You can also try searching for doctors [here](https://www.zocdoc.com/).")
-            st.subheader(r[1])
-            re = r[1].split(" ")
-            remo = ' '.join(re[1:])
-            results = get_doctors(insurance, remo, Zipcode)
-            if len(results)> 0:
-                for row in results:
-                    expander_title = f"{row[1]}"
-                    with st.expander(expander_title, expanded=False):
-                        col1, col2 = st.columns(2)
-                        with col1:
-                            st.write(f"Doctor Name: {row[1]}")
-                            st.write(f"Practice: {row[14]}")
-                            st.write(f"License ID: {row[2]}")
-                            st.write(f"License Status: {row[3]}")
-                        with col2:
-                            st.write(f"Accepts Medicaid: {row[4]}")
-                            st.write(f"Accepts New Patients: {row[5]}")
-                            st.write(f"Insurance: {row[6]}")
-                            st.write(f"City: {row[7]}")
-                            st.write(f"State: {row[8]}")
-                            st.write(f"Zipcode: {row[9]}")
-                        st.markdown(f'[Find the Doctor here](https://www.google.com/maps/search/?api=1&query={row[10]},{row[11]})', unsafe_allow_html=True)
-                        st.markdown("[Book Appointment here](https://www.zocdoc.com/)")
-            else:
-                st.subheader("No doctors found for these Symptoms in the current database.")
-                st.write("Please try again later. We keep Updating the database every week. Thank you for your patience.")
-                st.write("You can also try searching for doctors [here](https://www.zocdoc.com/).")
-            st.subheader(r[2])
-            re = r[2].split(" ")
-            remo = ' '.join(re[1:])
-            results = get_doctors(insurance, remo, Zipcode)
-            if len(results)> 0:
-                for row in results:
-                    expander_title = f"{row[1]}"
-                    with st.expander(expander_title, expanded=False):
-                        col1, col2 = st.columns(2)
-                        with col1:
-                            st.write(f"Doctor Name: {row[1]}")
-                            st.write(f"Practice: {row[14]}")
-                            st.write(f"License ID: {row[2]}")
-                            st.write(f"License Status: {row[3]}")
-                        with col2:
-                            st.write(f"Accepts Medicaid: {row[4]}")
-                            st.write(f"Accepts New Patients: {row[5]}")
-                            st.write(f"Insurance: {row[6]}")
-                            st.write(f"City: {row[7]}")
-                            st.write(f"State: {row[8]}")
-                            st.write(f"Zipcode: {row[9]}")
-                        st.markdown(f'[Find the Doctor here](https://www.google.com/maps/search/?api=1&query={row[10]},{row[11]})', unsafe_allow_html=True)
-                        st.markdown("[Book Appointment here](https://www.zocdoc.com/)")
-            else:
-                st.subheader("No doctors found for these Symptoms in the current database.")
-                st.write("Please try again later. We keep Updating the database every week. Thank you for your patience.")
-                st.write("You can also try searching for doctors [here](https://www.zocdoc.com/).")
-        
+                st.warning("Please enter Symptoms to find personalized doctors.")
+
+##############################################################################################################
+        # HOSPITALS      
         elif st.session_state['display_content'] == 'hospitals':
-            st.subheader("Hospitals near you: {}".format(Zipcode))
-            results = get_hospitals(Zipcode)
-            if len(results) == 0:
-                st.write("No hospitals found for this Zipcode. Please with another Zipcode.")
-                st.write("You can also try searching for hospitals [here](https://www.google.com/maps/search/hospitals+near+me/).")
+            if Zipcode != "":
+                st.subheader("Hospitals near you: {}".format(Zipcode))
+                results = get_hospitals(Zipcode)
+                if len(results) == 0:
+                    st.write("No hospitals found for this Zipcode. Please with another Zipcode.")
+                    st.write("You can also try searching for hospitals [here](https://www.google.com/maps/search/hospitals+near+me/).")
+                else:
+                    df = pd.DataFrame(results)
+                    df.columns = ['Hospital ID', 'Hospital Name', 'Zipcode', 'City', 'Latitude', 'Longitude', 'TimeZone']
+                    df['Location'] = df.apply(lambda row: f'<a href="https://www.google.com/maps/search/?api=1&query={row.iloc[4]},{row.iloc[5]}" target="_blank">Maps</a>', axis=1)
+                    df = df.drop(['Latitude', 'Longitude', 'TimeZone'], axis=1)
+                    st.markdown(df.to_html(escape=False, index=False), unsafe_allow_html=True)
             else:
-                df = pd.DataFrame(results)
-                df.columns = ['Hospital ID', 'Hospital Name', 'Zipcode', 'City', 'Latitude', 'Longitude', 'TimeZone']
-                df['Location'] = df.apply(lambda row: f'<a href="https://www.google.com/maps/search/?api=1&query={row.iloc[4]},{row.iloc[5]}" target="_blank">Maps</a>', axis=1)
-                df = df.drop(['Latitude', 'Longitude', 'TimeZone'], axis=1)
-                st.markdown(df.to_html(escape=False, index=False), unsafe_allow_html=True)
+                st.warning("Please enter a Zipcode to find hospitals near you.")
             
-
+##############################################################################################################
         # Logout button
         if st.sidebar.button("Logout"):
             for key in list(st.session_state.keys()):

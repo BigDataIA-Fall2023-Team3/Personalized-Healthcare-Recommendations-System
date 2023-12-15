@@ -47,12 +47,12 @@ def add_patient(username, password, first_name, last_name, age, has_insurance, i
         if conn:
             conn.close()
 
-def add_doctor(username, password, other_details):
+def add_doctor(first_name, last_name, practice, email, username, password):
     conn = connect_db()
     cursor = conn.cursor()
     # Modify the query based on your table structure
-    cursor.execute("INSERT INTO doctor (username, password, other_details) VALUES (%s, %s, %s)", 
-                   (username, password, other_details))
+    cursor.execute("INSERT INTO doctor (first_name, last_name, practice, email, username, password) VALUES (%s, %s, %s, %s, %s, %s)", 
+                   (first_name, last_name, practice, email, username, password))
     conn.commit()
     conn.close()
 
@@ -91,18 +91,25 @@ with st.expander("Patient Sign Up"):
 
 with st.expander('Doctor Guide'):
     st.write('''
-    1. Click on the 'Sign Up' button if you havent registered already.
-    2. Enter your credentials and click on 'Login' in the doctor page.
-    3. View your patients and their recommendations.
+    ### Why use the Personalized Healthcare Recommendation System?
+   #### Diagnostic Aid: 
+    The app serves as a diagnostic tool, helping doctors quickly assess patient symptoms, age, and gender to suggest possible diagnoses, enhancing clinical decision-making.
+#### Treatment Planning: 
+    With access to a database of diseases and symptoms, doctors can explore various treatment options, tailor care plans to individual patient needs, and stay updated with the latest in healthcare protocols.
+#### Efficiency in Patient Care: 
+    The app streamlines the process of patient assessment, allowing doctors to focus more on patient care and less on administrative tasks.
     ''')
 
 with st.expander("Doctor Sign Up"):
     with st.form("Doctor_Form"):
+        doctor_first_name = st.text_input("First Name")
+        doctor_last_name = st.text_input("Last Name")
+        doctor_practice = st.text_input("Practice")
+        doctor_email = st.text_input("Email")
         doctor_username = st.text_input("Username", key="doctor_username")
         doctor_password = st.text_input("Password", type="password", key="doctor_password")
-        # Add other necessary fields
         submit_doctor = st.form_submit_button("Sign Up as Doctor")
 
         if submit_doctor:
-            add_doctor(doctor_username, doctor_password, "other details here")  # Add appropriate function arguments
+            add_doctor(doctor_first_name, doctor_last_name, doctor_practice, doctor_email, doctor_username, doctor_password)  # Add appropriate function arguments
             st.success("Doctor Registered Successfully!")
