@@ -5,8 +5,6 @@ import time
 import requests
 import json
 import pandas as pd
-import folium
-from streamlit_folium import st_folium
 
 # Parameters for connecting to the database
 db_host = st.secrets["DB_HOST"]
