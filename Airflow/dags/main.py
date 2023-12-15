@@ -19,7 +19,7 @@ s3_object_key = 'List_of_Infectious_Diseases.csv'
 EMBEDDING_MODEL = "text-embedding-ada-002"
 
 try:
-    pinecone.init(api_key='a15f5585-8c0e-4ba5-aa3a-636f26cc5543', environment='gcp-starter')
+    pinecone.init(api_key=os.getenv('PINECONE'), environment='gcp-starter')
     index = pinecone.Index('bigdata')
     print("Pinecone initialization and index creation successful.")
 except Exception as e:
