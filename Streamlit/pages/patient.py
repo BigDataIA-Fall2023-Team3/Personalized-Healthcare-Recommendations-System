@@ -39,7 +39,7 @@ def set_bg_hack(main_bg):
          """,
         unsafe_allow_html=True
     )
-set_bg_hack('/Users/keerthi/Desktop/Final-Project/Streamlit/images/blue.jpeg')
+set_bg_hack('/Users/sumanayanakonda/Desktop/Final-Project/Streamlit/images/blue.jpeg')
 
 # Function to get Doctor Specialies:
 
@@ -89,6 +89,7 @@ def check_session_timeout(session_start_time, timeout_minutes=30):
     elapsed_time = current_time - session_start_time
     return elapsed_time > (timeout_minutes * 60)
 
+st.title('Patient Portal')
 # Initialize session state variables
 if 'logged_in' not in st.session_state:
     st.session_state['logged_in'] = False
@@ -121,7 +122,35 @@ if st.session_state['logged_in']:
         st.warning("Session has timed out. Please login again.")
     else:
         # Display user interface
-        st.title(f"Welcome, {st.session_state['username']}!")
+        with st.expander("""### How to Navigate the Patient Portal"""):
+            st.write("""
+
+    #### Viewing Patient Details:
+    - Once logged in, click on the 'Patient Details' expander to view your personal information.
+
+    #### Using Key Features:
+
+    **Enter Your Symptoms:**
+    - Enter any symptoms you're experiencing in the 'Symptoms' text field.
+    - Optionally, you can provide additional information in the 'Additional Information' field to give more context to your symptoms.
+
+    **Finding Doctors and Hospitals:**
+    - If you want to find doctors or hospitals near you, enter your Zipcode in the 'Zipcode' field.
+    - Click on the respective buttons ('Doctors' or 'Hospitals') to get a list based on your input.
+
+    **Initial Diagnosis:**
+    - Click on 'Initial diagnosis' to receive a preliminary diagnosis based on the symptoms you've entered. This will be displayed under different hypotheses for your reference.
+
+    **Exploring Doctor Recommendations:**
+    - Under 'Personalized Doctors', you'll see a list of recommended doctors based on your symptoms and entered information.
+    - Click on an expandable section for each doctor to see detailed information, including their practice, license status, and location.
+    - Use the provided Google Maps link to find the doctor's location easily.
+
+    **Finding Nearby Hospitals:**
+    - When you click on 'Hospitals', the app will display a list of hospitals near the provided Zipcode.
+    - The app shows hospital details and a link to their location on Google Maps for your convenience.
+""")
+            
 
         # Show patient details
         patient_details = st.session_state['patient_details']
@@ -280,7 +309,3 @@ if st.session_state['logged_in']:
 # Close the database connection
 conn.close()
 
-
-
-                
-            
