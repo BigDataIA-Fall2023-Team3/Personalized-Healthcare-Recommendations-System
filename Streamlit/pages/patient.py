@@ -211,7 +211,7 @@ if st.session_state['logged_in']:
  ##############################################################################################################
         # DOCTORS       
         elif st.session_state['display_content'] == 'doctors':
-            if Symptoms != "" and Zipcode != "":
+            if Symptoms != "" and Zipcode != "" and Zipcode.isdigit() and len(Zipcode) == 5:
                 r = find_doctors(Symptoms, age, gender, AI)
                 # st.write(r)
                 st.title("Personalized Doctors: ", )
@@ -299,12 +299,12 @@ if st.session_state['logged_in']:
                     st.write("Please try again later. We keep Updating the database every week. Thank you for your patience.")
                     st.write("You can also try searching for doctors [here](https://www.zocdoc.com/).")
             else:
-                st.warning("Please enter Symptoms and Zipcode to find personalized doctors.")
+                st.warning("Please enter Symptoms and Zipcode (5 digits) to find personalized doctors.")
 
 ##############################################################################################################
         # HOSPITALS      
         elif st.session_state['display_content'] == 'hospitals':
-            if Zipcode != "":
+            if Zipcode != "" and Zipcode.isdigit() and len(Zipcode) == 5:
                 st.subheader("Hospitals near you: {}".format(Zipcode))
                 results = get_hospitals(Zipcode)
                 if len(results) == 0:
@@ -317,7 +317,7 @@ if st.session_state['logged_in']:
                     df = df.drop(['Latitude', 'Longitude', 'TimeZone'], axis=1)
                     st.markdown(df.to_html(escape=False, index=False), unsafe_allow_html=True)
             else:
-                st.warning("Please enter a Zipcode to find hospitals near you.")
+                st.warning("Please enter a Zipcode (5 digits) to find hospitals near you.")
             
 ##############################################################################################################
         # Logout button

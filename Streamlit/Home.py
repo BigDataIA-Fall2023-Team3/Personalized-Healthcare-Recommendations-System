@@ -10,7 +10,7 @@ def connect_db():
         user=st.secrets["DB_USER"],
         password=st.secrets["DB_PASSWORD"],
         host=st.secrets["DB_HOST"],
-        port=5432  # Default PostgreSQL port
+        port=5432 
     )
 
 def set_bg_hack(main_bg):
@@ -37,32 +37,7 @@ def hash_password(password):
     return pw.decode('utf-8')
 
 
-def add_patient(username, password, first_name, last_name, age, has_insurance, insurance, gender):
-    try:
-        conn = connect_db()
-        cursor = conn.cursor()
-        
-        # Modify the query based on your table structure
-        hashed_password = hash_password(password)
-        cursor.execute("INSERT INTO patient (first_name, last_name, age, has_insurance, insurance, gender, username, password) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)", 
-                       (first_name, last_name, age, has_insurance, insurance, gender, username, hashed_password))
-        
-        conn.commit()
-    except Exception as e:
-        print(f"Error: {e}")
-    finally:
-        if conn:
-            conn.close()
-
-def add_doctor(first_name, last_name, practice, email, username, password):
-    conn = connect_db()
-    cursor = conn.cursor()
-    # Modify the query based on your table structure
-    hashed_password = hash_password(password)
-    cursor.execute("INSERT INTO doctor (first_name, last_name, practice, email, username, password) VALUES (%s, %s, %s, %s, %s, %s)", 
-                   (first_name, last_name, practice, email, username, hashed_password))
-    conn.commit()
-    conn.close()
+    
 
 st.title('Welcome to the Personalized Healthcare Recommendation System')
 
@@ -96,9 +71,25 @@ with st.expander("Patient Sign Up"):
         
         submit_patient = st.form_submit_button("Sign Up as Patient")
 
-        if submit_patient:
-            add_patient(patient_username, patient_password, patient_first_name, patient_last_name, patient_age, patient_has_insurance, patient_insurance, patient_gender)  # Add appropriate function arguments
-            st.success("Patient Registered Successfully!")
+        if submit_patient and patient_has_insurance == "Yes" and patient_insurance != "" and patient_first_name != '' and patient_last_name != '' and patient_age != '' and patient_gender != '' and patient_username != '' and patient_password != '':
+            try:
+                conn = connect_db()
+                cursor = conn.cursor()
+                hashed_password = hash_password(patient_password)
+                cursor.execute("""INSERT INTO patient (first_name, last_name, age, has_insurance, insurance, gender, username, password) 
+                                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""", 
+                            (patient_first_name, patient_last_name, patient_age, patient_has_insurance, patient_insurance, patient_gender, patient_username, hashed_password))
+                conn.commit()
+                st.success("Patient Registered Successfully!")
+            except Exception as e:
+                st.error(f"Error: {e}")
+                conn.rollback()
+            finally:
+                if conn:
+                    conn.close()
+        else:
+            st.warning("Please fill in all the fields")
+            
 
 with st.expander('Doctor Guide'):
     st.write('''
@@ -121,6 +112,22 @@ with st.expander("Doctor Sign Up"):
         doctor_password = st.text_input("Password", type="password", key="doctor_password")
         submit_doctor = st.form_submit_button("Sign Up as Doctor")
 
-        if submit_doctor:
-            add_doctor(doctor_first_name, doctor_last_name, doctor_practice, doctor_email, doctor_username, doctor_password)  # Add appropriate function arguments
-            st.success("Doctor Registered Successfully!")
+        if submit_doctor and doctor_first_name != '' and doctor_last_name != '' and doctor_email != '' and doctor_username != '' and doctor_password != '':
+            conn = connect_db()
+            try:
+                cursor = conn.cursor()
+                hashed_password = hash_password(doctor_password)
+                cursor.execute("""INSERT INTO doctor (first_name, last_name, practice, email, username, password) 
+                                VALUES (%s, %s, %s, %s, %s, %s)""", 
+                            (doctor_first_name, doctor_last_name, doctor_practice, doctor_email, doctor_username, hashed_password))
+                conn.commit()
+                st.success("Doctor Registered Successfully!")
+            except Exception as e:
+                st.error(f"Error: {e}")
+                conn.rollback()
+            finally:
+                cursor.close()
+                conn.close()
+        else:
+            st.warning("Please fill in all the fields")
+            
