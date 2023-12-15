@@ -5,6 +5,9 @@ import time
 import requests
 import json
 import pandas as pd
+import folium
+from streamlit_folium import st_folium
+
 # Parameters for connecting to the database
 db_host = st.secrets["DB_HOST"]
 db_name = st.secrets["DB_NAME"]
@@ -75,6 +78,13 @@ def get_doctors(insurance, specialty, Zipcode):
     response = requests.post(url, json=data)
     return response.json()
   
+def get_hospitals(Zipcode):
+    url = 'https://project-final-f9937888519e.herokuapp.com/hospital/'
+    data = {
+        "zipcode": Zipcode
+    }
+    response = requests.post(url, json=data)
+    return response.json()
 
 def check_session_timeout(session_start_time, timeout_minutes=30):
     current_time = time.time()
@@ -182,6 +192,7 @@ if st.session_state['logged_in']:
                             st.write(f"City: {row[7]}")
                             st.write(f"State: {row[8]}")
                             st.write(f"Zipcode: {row[9]}")
+                        st.markdown(f'[Find the Doctor here](https://www.google.com/maps/search/?api=1&query={row[10]},{row[11]})', unsafe_allow_html=True)
                         st.markdown("[Book Appointment here](https://www.zocdoc.com/)")
             else:
                 st.subheader("No doctors found for these Symptoms in the current database.")
@@ -210,6 +221,7 @@ if st.session_state['logged_in']:
                             st.write(f"City: {row[7]}")
                             st.write(f"State: {row[8]}")
                             st.write(f"Zipcode: {row[9]}")
+                        st.markdown(f'[Find the Doctor here](https://www.google.com/maps/search/?api=1&query={row[10]},{row[11]})', unsafe_allow_html=True)
                         st.markdown("[Book Appointment here](https://www.zocdoc.com/)")
             else:
                 st.subheader("No doctors found for these Symptoms in the current database.")
@@ -238,6 +250,7 @@ if st.session_state['logged_in']:
                             st.write(f"City: {row[7]}")
                             st.write(f"State: {row[8]}")
                             st.write(f"Zipcode: {row[9]}")
+                        st.markdown(f'[Find the Doctor here](https://www.google.com/maps/search/?api=1&query={row[10]},{row[11]})', unsafe_allow_html=True)
                         st.markdown("[Book Appointment here](https://www.zocdoc.com/)")
             else:
                 st.subheader("No doctors found for these Symptoms in the current database.")
@@ -245,7 +258,20 @@ if st.session_state['logged_in']:
                 st.write("You can also try searching for doctors [here](https://www.zocdoc.com/).")
         
         elif st.session_state['display_content'] == 'hospitals':
-            st.write("Hospital information goes here.")
+            st.subheader("Hospitals near you: {}".format(Zipcode))
+            results = get_hospitals(Zipcode)
+            if len(results) == 0:
+                st.write("No hospitals found for this Zipcode. Please with another Zipcode.")
+                st.write("You can also try searching for hospitals [here](https://www.google.com/maps/search/hospitals+near+me/).")
+            else:
+                df = pd.DataFrame(results)
+                df.columns = ['Hospital ID', 'Hospital Name', 'Zipcode', 'City', 'Latitude', 'Longitude', 'TimeZone']
+                df['Location'] = df.apply(lambda row: f'<a href="https://www.google.com/maps/search/?api=1&query={row.iloc[4]},{row.iloc[5]}" target="_blank">Maps</a>', axis=1)
+                st.markdown(df.to_html(escape=False, index=False), unsafe_allow_html=True)
+                df = df.drop(['Latitude', 'Longitude', 'TimeZone'], axis=1)
+                if df is not None:
+                    st.table(df)
+            
 
         # Logout button
         if st.sidebar.button("Logout"):
