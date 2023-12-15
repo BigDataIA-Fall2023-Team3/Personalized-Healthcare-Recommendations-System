@@ -199,7 +199,7 @@ if st.session_state['logged_in']:
  ##############################################################################################################
         # DOCTORS       
         elif st.session_state['display_content'] == 'doctors':
-            if Symptoms != "":
+            if Symptoms != "" and Zipcode != "":
                 r = find_doctors(Symptoms, age, gender, AI)
                 # st.write(r)
                 st.title("Personalized Doctors: ", )
@@ -208,6 +208,7 @@ if st.session_state['logged_in']:
                 re = r[0].split(" ")
                 remo = ' '.join(re[1:])
                 results = get_doctors(insurance, remo, Zipcode)
+                # print(results)
                 if len(results)> 0: 
                     for row in results:
                         expander_title = f"{row[1]}"
@@ -286,7 +287,7 @@ if st.session_state['logged_in']:
                     st.write("Please try again later. We keep Updating the database every week. Thank you for your patience.")
                     st.write("You can also try searching for doctors [here](https://www.zocdoc.com/).")
             else:
-                st.warning("Please enter Symptoms to find personalized doctors.")
+                st.warning("Please enter Symptoms and Zipcode to find personalized doctors.")
 
 ##############################################################################################################
         # HOSPITALS      
