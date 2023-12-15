@@ -2,7 +2,8 @@
 
 # Personalized Healthcare Recommendations System
 
-- [Codelabs](https://codelabs-preview.appspot.com/?file_id=1y61v1qp4Ka0kiWXvonMbmfMXaKszp-lO-T1XDsl-l0M#0)
+- [Codelabs](https://codelabs-preview.appspot.com/?file_id=12xSA54puYEnSkJqp-kGrLlwYCNaAwCsE7-ozc-PrYOQ#0)
+- [Streamlit](https://personalized-healthcare-medications.streamlit.app/)
 
 ## Problem Statement:
 
