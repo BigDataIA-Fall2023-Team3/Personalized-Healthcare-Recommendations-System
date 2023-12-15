@@ -5,6 +5,7 @@ import time
 import requests
 import json
 import pandas as pd
+import bcrypt
 
 # Parameters for connecting to the database
 db_host = st.secrets["DB_HOST"]
@@ -19,6 +20,7 @@ conn = psycopg2.connect(
     port=5432  # Default PostgreSQL port
 )
 cursor = conn.cursor()
+
 gender_choices = ["Male", "Female", "Other"]
 def set_bg_hack(main_bg):
     main_bg_ext = "jpeg"
@@ -67,15 +69,22 @@ if not st.session_state['logged_in']:
     login_button = st.sidebar.button("Login")
 
     if login_button:
-        cursor.execute("SELECT * FROM doctor WHERE username = %s AND password = %s", (username, password))
+        cursor.execute("SELECT * FROM doctor WHERE username = 'Aksh@12345'")
         result = cursor.fetchone()
-        if result and check_password(result[0].encode('utf-8'), password):
-            st.session_state['logged_in'] = True
-            st.session_state['username'] = username
-            st.session_state['session_start_time'] = time.time()
-            st.session_state['doctor_details'] = result  # Store patient details
+        if result:
+            hashed_password = result[-1]
+            st.write("inside if result")
+            if isinstance(hashed_password, str):
+                hashed_password = hashed_password.encode('utf-8')
+            if hashed_password and check_password(hashed_password, password):
+                st.session_state['logged_in'] = True
+                st.session_state['username'] = username
+                st.session_state['session_start_time'] = time.time()
+                st.session_state['doctor_details'] = result 
+            else:
+                 st.warning("Incorrect Password")
         else:
-            st.warning("Incorrect Username/Password")
+            st.warning("Incorrect Username not found")
 
 ##############################################################################################################
 #Doctor Details

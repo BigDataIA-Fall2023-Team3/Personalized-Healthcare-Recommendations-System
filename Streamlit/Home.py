@@ -71,11 +71,14 @@ with st.expander('Patient Guide'):
     ### Why use the Personalized Healthcare Recommendation System?
              
     #### Personalized Healthcare Guidance: 
+    
     Patients receive tailored recommendations based on their symptoms, age, and other personal details, helping them identify potential health issues quickly.
     
     #### Easy Access to Healthcare Providers: 
+    
     The app simplifies finding local doctors and hospitals, making it easier for patients to seek the care they need.
     #### Streamlined Registration and Insurance Information: 
+    
     With a user-friendly sign-up process, patients can easily register and provide necessary information, including insurance details, enhancing their healthcare experience.
     Empowered Decision-Making: The app gives patients the tools and information to make informed decisions about their health, including the option to explore different healthcare providers and services.
     ''')
@@ -99,14 +102,14 @@ with st.expander("Patient Sign Up"):
 
 with st.expander('Doctor Guide'):
     st.write('''
-    ### Why use the Personalized Healthcare Recommendation System?
-   #### Diagnostic Aid: 
-    The app serves as a diagnostic tool, helping doctors quickly assess patient symptoms, age, and gender to suggest possible diagnoses, enhancing clinical decision-making.
+### Why use the Personalized Healthcare Recommendation System?
+#### Diagnostic Aid: 
+The app serves as a diagnostic tool, helping doctors quickly assess patient symptoms, age, and gender to suggest possible diagnoses, enhancing clinical decision-making.
 #### Treatment Planning: 
-    With access to a database of diseases and symptoms, doctors can explore various treatment options, tailor care plans to individual patient needs, and stay updated with the latest in healthcare protocols.
+With access to a database of diseases and symptoms, doctors can explore various treatment options, tailor care plans to individual patient needs, and stay updated with the latest in healthcare protocols.
 #### Efficiency in Patient Care: 
-    The app streamlines the process of patient assessment, allowing doctors to focus more on patient care and less on administrative tasks.
-    ''')
+The app streamlines the process of patient assessment, allowing doctors to focus more on patient care and less on administrative tasks.
+''')
 
 with st.expander("Doctor Sign Up"):
     with st.form("Doctor_Form"):
