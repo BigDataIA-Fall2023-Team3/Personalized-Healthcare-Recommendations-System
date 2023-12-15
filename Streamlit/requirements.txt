@@ -3,4 +3,4 @@ streamlit
 pandas
 bcrypt
 openai
-pinecone
+pinecone-client
