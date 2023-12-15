@@ -87,6 +87,17 @@ def find_close(l, myzip, insurance, specialty):
     return results[:3]
 
 
+def find_close_hospital(zipcode):
+    conn = snowflake.connector.connect(**snowflake_config)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM FP_DB.DATASETS_2.HOSPITALS WHERE ZIPCODE = %s;", (zipcode))
+    specialties = cursor.fetchall()
+    return specialties
+    
+
+
+
+
 def get_doctor_specialties():
     conn = snowflake.connector.connect(**snowflake_config)
     cursor = conn.cursor()
@@ -191,5 +202,16 @@ async def get_doctors(insurance: Insurance):
             insurance.Zipcode
         )
         return recommendations
+    except:
+        raise HTTPException(status_code=400, detail="Error Connecting to Snowflake")
+
+class Zipcode(BaseModel):
+    zipcode: str
+
+@app.post("/hospital/")
+async def hospital(zipcode: Zipcode):
+    try:
+        r = find_close_hospital(zipcode.zipcode)
+        return r
     except:
         raise HTTPException(status_code=400, detail="Error Connecting to Snowflake")
