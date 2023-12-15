@@ -195,7 +195,7 @@ if st.session_state['logged_in']:
             r = find_doctors(Symptoms, age, gender, AI)
             # st.write(r)
             st.title("Personalized Doctors: ", )
-            if r[0] is not None:
+            if len(r) > 0:
                 # st.subheader(r[0])
                 st.subheader(r[0])
                 re = r[0].split(" ")
@@ -225,7 +225,7 @@ if st.session_state['logged_in']:
                 st.subheader("No doctors found for these Symptoms in the current database.")
                 st.write("Please try again later. We keep Updating the database every week. Thank you for your patience.")
                 st.write("You can also try searching for doctors [here](https://www.zocdoc.com/).")
-            if r[1] is not None:
+            if len(r)>=1:
                 st.subheader(r[1])
                 re = r[1].split(" ")
                 remo = ' '.join(re[1:])
@@ -254,7 +254,7 @@ if st.session_state['logged_in']:
                 st.subheader("No doctors found for these Symptoms in the current database.")
                 st.write("Please try again later. We keep Updating the database every week. Thank you for your patience.")
                 st.write("You can also try searching for doctors [here](https://www.zocdoc.com/).")
-            if r[2] is not None:
+            if len(r)>=2:
                 st.subheader(r[2])
                 re = r[2].split(" ")
                 remo = ' '.join(re[1:])
