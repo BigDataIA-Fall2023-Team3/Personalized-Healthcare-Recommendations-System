@@ -69,22 +69,9 @@ if not st.session_state['logged_in']:
     login_button = st.sidebar.button("Login")
 
     if login_button:
-        cursor.execute("SELECT * FROM doctor WHERE username = 'Aksh@12345'")
-        result = cursor.fetchone()
-        if result:
-            hashed_password = result[-1]
-            st.write("inside if result")
-            if isinstance(hashed_password, str):
-                hashed_password = hashed_password.encode('utf-8')
-            if hashed_password and check_password(hashed_password, password):
-                st.session_state['logged_in'] = True
-                st.session_state['username'] = username
-                st.session_state['session_start_time'] = time.time()
-                st.session_state['doctor_details'] = result 
-            else:
-                 st.warning("Incorrect Password")
-        else:
-            st.warning("Incorrect Username not found")
+        st.session_state['logged_in'] = True
+        st.session_state['session_start_time'] = time.time()
+
 
 ##############################################################################################################
 #Doctor Details
@@ -94,17 +81,8 @@ if st.session_state['logged_in']:
         st.session_state['logged_in'] = False
         st.warning("Session has timed out. Please login again.")
     else:
-       # Show patient details
-        doctor_details = st.session_state['doctor_details']
-        doctor_id, doctor_f, doctor_l, doctor_p, doctor_e, doctor_username, doctor_password = doctor_details
-        with st.expander("Doctor Details"):
-            st.write(f"Doctor ID: {doctor_id}")
-            st.write(f"First Name: {doctor_f}")
-            st.write(f"Last Name: {doctor_l}")
-            st.write(f"Practice: {doctor_p}")
-            st.write(f"Email: {doctor_e}")
-            st.write(f"Username: {doctor_username}")
-
+        st.sidebar.subheader("Doctor Details")
+        st.write("Doctor Details Comes Here")
         Gender = st.selectbox("Select the Gender of the Patient", gender_choices)
         Age = st.number_input("Enter the Age of the Patient", min_value=0, max_value=120)
         Symptoms = st.text_input("Symptoms")
