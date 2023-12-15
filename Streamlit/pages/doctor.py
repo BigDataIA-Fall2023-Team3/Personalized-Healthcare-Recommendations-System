@@ -6,6 +6,10 @@ import requests
 import json
 import pandas as pd
 import bcrypt
+import os
+from openai import OpenAI
+from pinecone import init, Index
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 # Parameters for connecting to the database
 db_host = st.secrets["DB_HOST"]
@@ -20,6 +24,11 @@ conn = psycopg2.connect(
     port=5432  # Default PostgreSQL port
 )
 cursor = conn.cursor()
+
+pinecone_api_key = st.secrets['PINECONE_API_KEY']
+pinecone_env = 'gcp-starter'
+init(api_key=pinecone_api_key, environment=pinecone_env)
+index = Index('bigdata')
 
 gender_choices = ["Male", "Female", "Other"]
 def set_bg_hack(main_bg):
@@ -46,6 +55,15 @@ def check_session_timeout(session_start_time, timeout_minutes=30):
     current_time = time.time()
     elapsed_time = current_time - session_start_time
     return elapsed_time > (timeout_minutes * 60)
+
+def perform_pinecone_search(txt, model="text-embedding-ada-002"):
+    # Use the OpenAI Embed API to get the text embedding
+    response = client.embeddings.create(input=txt, model=model)
+    embedding = response.data[0].embedding
+     # Perform Pinecone search using the embedding
+    res = index.query(vector=embedding, top_k=1, include_metadata=True)
+ 
+    return res
 ##############################################################################################################
 
 #App Content
@@ -116,14 +134,21 @@ if st.session_state['logged_in']:
 
         if st.session_state['display_content'] == 'Submit':
             if Symptoms != '' and Age != '' and Gender != '':
+                # Perform Pinecone search
+                search_results = perform_pinecone_search(Symptoms)
+                if len(search_results['matches']) > 0:
+                    metadata = search_results['matches'][0]['metadata']
+                    st.write("Diagnosis:", metadata.get("Diagnosis", ""))
+                    st.write("Recommended Treatment:", metadata.get("Treatment", ""))
+                else:
+                    st.warning("No matching diagnosis and treatment found.")
 
 
-                     # Insert THE DOCTOR CODE HERE.
                 st.write("Submit")
             else:
                 st.warning("Please fill in all the fields")
             
-            # Insert THE DOCTOR CODE HERE.
+
 
 
 
