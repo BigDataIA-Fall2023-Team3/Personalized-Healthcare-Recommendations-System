@@ -14,7 +14,7 @@ def set_bg_hack(main_bg):
          """,
         unsafe_allow_html=True
     )
-set_bg_hack('/Users/sumanayanakonda/Desktop/Final-Project/Streamlit/images/blue.jpeg')
+set_bg_hack('/mount/src/final-project/Streamlit/images/blue.jpeg')
 
 
 # Check what content to display
