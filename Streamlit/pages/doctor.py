@@ -141,16 +141,21 @@ if st.session_state['logged_in']:
         if st.session_state['display_content'] == 'Submit':
             if Symptoms != '' and Age != '' and Gender != '':
                 # Perform Pinecone search
+                
                 st.header("Medical Diagnosis and Treatment Recommendation")
-                search_results = perform_pinecone_search(Symptoms)
-                if len(search_results['matches']) > 0:
-                    metadata = search_results['matches'][0]['metadata']
-                    with st.expander("Diagnostic Information"):
-                        st.write("Diagnosis:", metadata.get("Diagnosis", ""))
-                    with st.expander("Treatment Information"):
-                        st.write("Recommended Treatment:", metadata.get("Treatment", ""))
-                else:
-                    st.warning("No matching diagnosis and treatment found.")
+                try:
+                    search_results = perform_pinecone_search(Symptoms)
+                    if len(search_results['matches']) > 0:
+                        metadata = search_results['matches'][0]['metadata']
+                        with st.expander("Diagnostic Information"):
+                            st.write("Diagnosis:", metadata.get("Diagnosis", ""))
+                        with st.expander("Treatment Information"):
+                            st.write("Recommended Treatment:", metadata.get("Treatment", ""))
+                    else:
+                        st.warning("No matching diagnosis and treatment found.")
+                except Exception as e:
+                    st.error(f"Error: {e}")
+                    st.error("Please try again.")
             else:
                 st.warning("Please fill in all the fields")
             
@@ -168,32 +173,5 @@ if st.session_state['logged_in']:
 
 conn.close()
 
-##############################################################################################################
-def diagnose(symptoms):
-   
-    #  used  dummy diagnosis and treatment here
-    diagnosis = "Common Cold"
-    treatment = "Rest and stay hydrated"
 
-    return diagnosis, treatment
-
-def main():
-    st.title("Medical Symptom Checker for Doctors")
-
-    # Get patient symptoms from the user
-    symptoms = st.text_area("Enter patient symptoms (comma-separated):")
-
-    if st.button("Diagnose"):
-        if symptoms:
-            # Split the symptoms entered by the user
-            symptom_list = [symptom.strip() for symptom in symptoms.split(',')]
-            
-            # Call the diagnose function
-            diagnosis, treatment = diagnose(symptom_list)
-
-            # Display the diagnosis and treatment
-            st.success(f"Diagnosis: {diagnosis}")
-            st.success(f"Treatment: {treatment}")
-        else:
-            st.warning("Please enter patient symptoms.")
 
