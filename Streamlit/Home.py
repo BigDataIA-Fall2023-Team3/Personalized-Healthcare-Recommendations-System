@@ -25,9 +25,9 @@ def set_bg_hack(main_bg):
          """,
         unsafe_allow_html=True
     )
-set_bg_hack('/mount/src/final-project/Streamlit/images/blue.jpeg')
+set_bg_hack(st.secrets["IMAGE_PATH"])
 
-csv_file_path = '/mount/src/final-project/Streamlit/Insurance.csv'
+csv_file_path = st.secrets["INSURANCE_PATH"]
 df = pd.read_csv(csv_file_path)
 options = df.iloc[:, 0].unique().tolist()
 

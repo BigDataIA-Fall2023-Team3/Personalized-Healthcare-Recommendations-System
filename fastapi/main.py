@@ -130,6 +130,7 @@ def generate_doctor_recommendations(symptoms, age, gender, special_instructions)
     prompt += f"Pick 3 relevant doctors specialties for the patient based on symptoms, age and additional information from these specialties: {specialties_str}\n"
     prompt += f"The specialties should come from the list I have provided above. Return Empty if no relevant specialties are found. Give the specialties name from the list word to word\n"
     prompt += f"Number the specialties too:\n"
+    prompt += f"Keep in mind Pediatrics is for children and Geriatrics is for the elderly\n"
     
     # Generate the answer with OpenAI API using the prompt
     response = client.chat.completions.create(
@@ -157,7 +158,7 @@ def initial(symptoms, age, gender, special_instructions):
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": f"{prompt}"}
         ],
-        max_tokens=50,  # Adjust max_tokens to limit the response length
+        max_tokens=100,  # Adjust max_tokens to limit the response length
         n=3  
     )
     recommendations = [response.choices[0].message.content, response.choices[1].message.content, response.choices[2].message.content]
