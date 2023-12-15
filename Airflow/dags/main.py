@@ -1,30 +1,32 @@
 import os
-import io
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from datetime import timedelta
 from bs4 import BeautifulSoup
 from airflow.utils.dates import days_ago
-
+import openai
 import requests
 import pandas as pd
 import re
-import csv
 import boto3
+import pinecone
+import time
+from openai import OpenAI
+import ast
 
 s3_bucket = 'final-project-data-sources'
 s3_object_key = 'List_of_Infectious_Diseases.csv'
+EMBEDDING_MODEL = "text-embedding-ada-002"
+
+try:
+    pinecone.init(api_key='a15f5585-8c0e-4ba5-aa3a-636f26cc5543', environment='gcp-starter')
+    index = pinecone.Index('bigdata')
+    print("Pinecone initialization and index creation successful.")
+except Exception as e:
+    print("An error occurred:", str(e))
 
 # Instantiate the DAG
-dag = DAG(
-     # Set the desired schedule interval
-    dag_id="wikipedia_scraper",
-    schedule_interval=None,   # Use schedule_interval instead of schedule
-    start_date=days_ago(0),
-    catchup=False,
-    dagrun_timeout=timedelta(minutes=60),
-    tags=["data_scraping"],
-)
+
 
 # Define a function that will be executed by the PythonOperator
 def scrape_and_download(output_csv_file):
@@ -169,6 +171,102 @@ def upload_csv_to_s3(csv_file_path, s3_object_key):
     # Upload the CSV file, replacing it if it already exists.
     s3_client.upload_file(csv_file_path, 'final-project-data-sources', s3_object_key)
 
+def download_file_from_s3( local_file_path = 'diseases.csv', bucket_name='final-project-data-sources',object_key = 'diseases.csv'):
+    aws_access_key_id = os.getenv('A_KEY')
+    aws_secret_access_key = os.getenv('SA_KEY')
+    try:
+        # Initialize an S3 client
+        s3 = boto3.client('s3', aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
+
+        # Download the file
+        s3.download_file(bucket_name, object_key, local_file_path)
+        print(f"File downloaded to {local_file_path}")
+    except Exception as e:
+        print(f"Error downloading file: {e}")
+
+
+def gen_embed(filename='diseases.csv'):
+    df = pd.read_csv(filename)
+    df = df.iloc[190:195]
+    list = df['Signs_and_symptoms'].tolist()
+    client = OpenAI(api_key=os.getenv('OPENAI_API'))
+    print("______________________________________________here")
+    print(len(list))
+    
+    embed_list = []
+    c = 0
+    for i in list:
+        text_embedding_response = client.embeddings.create(
+             input=i,
+            model=EMBEDDING_MODEL,
+        )
+        c+=1
+        text_embedding = text_embedding_response.data[0].embedding
+        embed_list.append(text_embedding)
+        print(c)
+        time.sleep(20)
+    df['embeds'] = embed_list
+    df.to_csv("embeddings.csv", index=False)
+    upload_csv_to_s3("embeddings.csv", "embeddings.csv")
+
+
+def download_embeds( local_file_path, object_key = 'embeddings.csv', bucket_name='final-project-data-sources'):
+    aws_access_key_id = os.getenv('A_KEY')
+    aws_secret_access_key = os.getenv('SA_KEY')
+    try:
+        # Initialize an S3 client
+        s3 = boto3.client('s3', aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
+
+        # Download the file
+        s3.download_file(bucket_name, object_key, local_file_path)
+        print(f"File downloaded to {local_file_path}")
+    except Exception as e:
+        print(f"Error downloading file: {e}")
+
+
+
+def pinecone_upsert(filename='embeddings.csv'):
+    df = pd.read_csv(filename)
+    df['embeds'] = df['embeds'].apply(ast.literal_eval)
+    df.head()
+
+    df = df.rename(columns={df.columns[0]: 'Index'})
+    df['Index'] = df['Index'].astype(str)
+    # Setting batch size as 32
+    batch_size = 32
+    for i in range(0, len(df), batch_size):
+        batch_df = df[i:i + batch_size]
+        id_list = batch_df['Index'].tolist()
+        embeds = batch_df['embeds'].tolist()
+        diseases_list = batch_df['Disease_name'].tolist()
+        symptoms_list = batch_df['Signs_and_symptoms'].tolist()
+        treatment_list = batch_df['Treatment'].tolist()
+        diagnosis_list = batch_df['Diagnosis'].tolist()
+        m_list = []
+        
+        for i in range(len(id_list)):
+            m = {'Disease_name': diseases_list[i], 'Signs_and_symptoms': symptoms_list[i], 'Treatment': treatment_list[i], 'Diagnosis': diagnosis_list[i]}
+            m_list.append(m)
+        print("___________________here")
+        print(m_list)
+        # meta = [{'text': text_batch} for text_batch in zip(metalist, text_list)]
+        to_upsert = zip(id_list, embeds, m_list) 
+        index.upsert(vectors=list(to_upsert))
+
+
+
+
+dag = DAG(
+     # Set the desired schedule interval
+    dag_id="wikipedia_scraper",
+    schedule_interval=None,   # Use schedule_interval instead of schedule
+    start_date=days_ago(0),
+    catchup=False,
+    dagrun_timeout=timedelta(minutes=60),
+    tags=["data_scraping"],
+)
+
+
 # Create a PythonOperator that will run the scrape_and_download function
 scrape_task = PythonOperator(
     task_id='scrape_and_download',
@@ -181,5 +279,59 @@ scrape_task = PythonOperator(
 # Set the task dependencies
 scrape_task
 
-if __name__ == "__main__":
-    dag.cli()
+
+
+dag2 = DAG(
+     # Set the desired schedule interval
+    dag_id="embeddings_generator",
+    schedule_interval=None,   # Use schedule_interval instead of schedule
+    start_date=days_ago(0),
+    catchup=False,
+    dagrun_timeout=timedelta(minutes=60),
+)
+
+download_file = PythonOperator(
+    task_id='download',
+    python_callable=download_file_from_s3, 
+    op_args=['/opt/airflow/diseases.csv'],
+    provide_context=True,  
+    dag=dag2,
+)
+
+generate_embeds = PythonOperator(
+    task_id='gen_embed',
+    python_callable=gen_embed,
+    provide_context=True,  # This is needed to access the context in the function
+    dag=dag2,
+)
+
+download_file >> generate_embeds
+
+dag3 = DAG(
+     # Set the desired schedule interval
+    dag_id="add_to_pinecone",
+    schedule_interval=None,   # Use schedule_interval instead of schedule
+    start_date=days_ago(0),
+    catchup=False,
+    dagrun_timeout=timedelta(minutes=60),
+)
+
+download = PythonOperator(
+    task_id='download_embeds',
+    python_callable=download_embeds, 
+    op_args=['/opt/airflow/embeddings.csv','embeddings.csv'],
+    provide_context=True,  
+    dag=dag3,
+)
+
+pinecone_update = PythonOperator(
+    task_id='update_pinecone',
+    python_callable=pinecone_upsert, 
+    provide_context=True,  
+    dag=dag3,
+)
+
+download >> pinecone_update
+
+
+
