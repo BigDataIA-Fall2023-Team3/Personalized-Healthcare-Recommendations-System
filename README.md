@@ -4,6 +4,8 @@
 
 - [Codelabs](https://codelabs-preview.appspot.com/?file_id=12xSA54puYEnSkJqp-kGrLlwYCNaAwCsE7-ozc-PrYOQ#0)
 - [Streamlit](https://personalized-healthcare-medications.streamlit.app/)
+- [Airflow](http://35.245.201.90:8080/home)
+- [Fast API](https://project-final-f9937888519e.herokuapp.com/docs)
 
 ## Problem Statement:
 
