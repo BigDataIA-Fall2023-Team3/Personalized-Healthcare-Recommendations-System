@@ -3,3 +3,4 @@ streamlit
 pandas
 bcrypt
 openai
+pinecode

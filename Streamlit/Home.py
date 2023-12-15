@@ -41,7 +41,7 @@ def hash_password(password):
 
 st.title('Welcome to the Personalized Healthcare Recommendation System')
 
-with st.expander('Patient Guide'):
+with st.expander('Patient Guide', expanded=True):
     st.write('''
     ### Why use the Personalized Healthcare Recommendation System?
              
@@ -91,7 +91,7 @@ with st.expander("Patient Sign Up"):
             st.warning("Please fill in all the fields")
             
 
-with st.expander('Doctor Guide'):
+with st.expander('Doctor Guide', expanded=True):
     st.write('''
 ### Why use the Personalized Healthcare Recommendation System?
 #### Diagnostic Aid: 

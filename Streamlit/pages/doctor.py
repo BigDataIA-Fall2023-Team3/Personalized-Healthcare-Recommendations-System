@@ -7,9 +7,9 @@ import json
 import pandas as pd
 import bcrypt
 import os
-from openai import OpenAI
+import openai
 from pinecone import init, Index
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 # Parameters for connecting to the database
 db_host = st.secrets["DB_HOST"]
@@ -56,22 +56,28 @@ def check_session_timeout(session_start_time, timeout_minutes=30):
     elapsed_time = current_time - session_start_time
     return elapsed_time > (timeout_minutes * 60)
 
-def perform_pinecone_search(txt, model="text-embedding-ada-002"):
+def perform_pinecone_search(txt):
     # Use the OpenAI Embed API to get the text embedding
-    response = client.embeddings.create(input=txt, model=model)
-    embedding = response.data[0].embedding
-     # Perform Pinecone search using the embedding
+    embedding = openai.Embedding.create(model="text-embedding-ada-002", input=txt)["data"][0]["embedding"]
+    
+    # Perform Pinecone search using the embedding
     res = index.query(vector=embedding, top_k=1, include_metadata=True)
- 
+
     return res
 ##############################################################################################################
 
 #App Content
 st.title('DOCTORS PORTAL')
-with st.expander("""### How to Navigate the Doctor Portal"""):
-            st.write("""
-DOCUMENTATION
-""")
+with st.expander("### How to Navigate the Doctor Portal"):
+    st.write("""
+    This Doctor's Portal is designed to streamline patient diagnosis and treatment. 
+    - **Login:** Doctors begin by logging into their account using their unique credentials.
+    - **Patient Details:** Once logged in, doctors can input patient details including gender, age, and symptoms.
+    - **Diagnosis and Treatment:** By submitting these details, the portal utilizes the OpenAI Embed API and Pinecone search to provide potential diagnoses and recommended treatments based on the symptoms entered.
+    - **Security:** The portal ensures security through encrypted passwords and session time-outs for added confidentiality.
+    - **User-Friendly Interface:** An intuitive design allows for easy navigation, making it an efficient tool for medical professionals.
+    """)
+
             
 ##############################################################################################################
 #Login          
@@ -135,16 +141,16 @@ if st.session_state['logged_in']:
         if st.session_state['display_content'] == 'Submit':
             if Symptoms != '' and Age != '' and Gender != '':
                 # Perform Pinecone search
+                st.header("Medical Diagnosis and Treatment Recommendation")
                 search_results = perform_pinecone_search(Symptoms)
                 if len(search_results['matches']) > 0:
                     metadata = search_results['matches'][0]['metadata']
-                    st.write("Diagnosis:", metadata.get("Diagnosis", ""))
-                    st.write("Recommended Treatment:", metadata.get("Treatment", ""))
+                    with st.expander("Diagnostic Information"):
+                        st.write("Diagnosis:", metadata.get("Diagnosis", ""))
+                    with st.expander("Treatment Information"):
+                        st.write("Recommended Treatment:", metadata.get("Treatment", ""))
                 else:
                     st.warning("No matching diagnosis and treatment found.")
-
-
-                st.write("Submit")
             else:
                 st.warning("Please fill in all the fields")
             
