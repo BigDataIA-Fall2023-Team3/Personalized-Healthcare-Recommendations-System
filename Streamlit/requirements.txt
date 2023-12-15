@@ -1,3 +1,1 @@
-streamlit
-pandas
-psycopg2
+psycopg2==2.9.9
