@@ -7,6 +7,7 @@
 - [Airflow](http://35.245.201.90:8080/home)
 - [Fast API](https://project-final-f9937888519e.herokuapp.com/docs)
 - [Demo, Youtube](https://www.youtube.com/watch?v=PVPjS4fYrCw)
+- The S3 Bucket link to get the data from : s3://final-project-datasets-1/Datasets-1-csv/
 
 ## Overview
 Our project presents an innovative Healthcare Recommendation and Management System, designed to enhance the healthcare experience for both patients and medical professionals. By integrating advanced technologies like AI-driven data analysis, vector databases, and automated data processing workflows, this system aims to simplify the complexity of healthcare decision-making.
