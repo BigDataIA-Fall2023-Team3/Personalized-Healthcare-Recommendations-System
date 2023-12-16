@@ -18,7 +18,7 @@ The healthcare sector often grapples with the challenge of effectively managing 
 
 
 ## Project Description
-Our system comprises four interconnected modules:
+Our system comprises five interconnected modules:
 * 		Data Processing with Apache Airflow:
     * Manages and orchestrates data workflows.
     * Processes diverse medical data sources for real-time insights.
