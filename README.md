@@ -1,5 +1,3 @@
-# Final-Project
-
 # Personalized Healthcare Recommendations System
 
 - [Codelabs](https://codelabs-preview.appspot.com/?file_id=12xSA54puYEnSkJqp-kGrLlwYCNaAwCsE7-ozc-PrYOQ#0)
