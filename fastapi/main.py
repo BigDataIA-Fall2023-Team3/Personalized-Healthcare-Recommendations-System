@@ -8,6 +8,7 @@ import os
 import pandas as pd
 import math
 
+
 app = FastAPI()
 
 # Define a Pydantic model to accept patient symptoms
